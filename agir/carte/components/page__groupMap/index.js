@@ -2,6 +2,8 @@ import onDOMReady from "@agir/lib/utils/onDOMReady";
 
 import logger from "@agir/lib/utils/log";
 
+const log = logger(__filename);
+
 (async function () {
   const [
     { default: React },

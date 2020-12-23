@@ -89,16 +89,20 @@ class NBUrlsView(View):
         raise Http404()
 
 
+class ReactAppView(SoftLoginRequiredMixin, ReactBaseView):
+    bundle_name = "front/app"
+
+
 class NavigationMenuView(SoftLoginRequiredMixin, ReactBaseView):
-    bundle_name = "front/navigationPage"
+    bundle_name = "front/app"
 
 
 class ActivityView(SoftLoginRequiredMixin, ReactBaseView):
-    bundle_name = "activity/page__activities"
+    bundle_name = "front/app"
 
 
 class RequiredActivityView(SoftLoginRequiredMixin, ReactBaseView):
-    bundle_name = "activity/page__requiredActivities"
+    bundle_name = "front/app"
 
 
 class FullSupportGroupView(SoftLoginRequiredMixin, ReactSingleObjectView):
@@ -134,7 +138,7 @@ class FullSupportGroupView(SoftLoginRequiredMixin, ReactSingleObjectView):
 
 
 class AgendaView(SoftLoginRequiredMixin, ReactSerializerBaseView):
-    bundle_name = "events/agendaPage"
+    bundle_name = "front/app"
     serializer_class = EventSerializer
 
     def get(self, request, *args, **kwargs):
@@ -241,8 +245,8 @@ class AgendaView(SoftLoginRequiredMixin, ReactSerializerBaseView):
 
 
 class MyGroupsView(SoftLoginRequiredMixin, ReactListView):
+    bundle_name = "front/app"
     serializer_class = SupportGroupSerializer
-    bundle_name = "groups/groupsPage"
     data_script_id = "mes-groupes"
 
     def get_queryset(self):
@@ -267,11 +271,11 @@ class MyGroupsView(SoftLoginRequiredMixin, ReactListView):
 
 
 class EventMapView(SoftLoginRequiredMixin, ReactBaseView):
-    bundle_name = "carte/page__eventMap"
+    bundle_name = "front/app"
 
 
 class GroupMapView(SoftLoginRequiredMixin, ReactBaseView):
-    bundle_name = "carte/page__groupMap"
+    bundle_name = "front/app"
 
 
 class NSPView(RedirectView):
