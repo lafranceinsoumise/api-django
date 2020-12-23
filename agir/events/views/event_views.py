@@ -138,7 +138,7 @@ class EventDetailView(ObjectOpengraphMixin, EventDetailMixin, ReactSingleObjectV
     meta_description_2022 = "Participez et organisez des événements pour soutenir la candidature de Jean-Luc Mélenchon pour 2022"
     serializer_class = serializers.EventSerializer
     queryset = Event.objects.all()
-    bundle_name = "events/eventPage"
+    bundle_name = "front/app"
     data_script_id = "exportedEvent"
 
 
