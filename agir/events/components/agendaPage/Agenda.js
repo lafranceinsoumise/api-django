@@ -22,6 +22,7 @@ import {
 import { dateFromISOString, displayHumanDay } from "@agir/lib/utils/time";
 import FilterTabs from "@agir/front/genericComponents/FilterTabs";
 import Onboarding from "@agir/front/genericComponents/Onboarding";
+import useSWR from "swr";
 
 const TopBar = styled.div`
   display: flex;
@@ -151,20 +152,20 @@ const otherEventConfig = {
   },
 };
 
-const OtherEvents = ({ others }) => {
+const SuggestionsEvents = ({ suggestions }) => {
   const routes = useSelector(getRoutes);
   const user = useSelector(getUser);
 
   const events = React.useMemo(
     () =>
-      others.map((event) => ({
+      suggestions.map((event) => ({
         ...event,
         schedule: Interval.fromDateTimes(
           dateFromISOString(event.startTime),
           dateFromISOString(event.endTime)
         ),
       })),
-    [others]
+    [suggestions]
   );
   const byType = React.useMemo(
     () =>
@@ -251,31 +252,28 @@ const OtherEvents = ({ others }) => {
   );
 };
 
-OtherEvents.propTypes = {
-  others: PropTypes.arrayOf(PropTypes.object),
+SuggestionsEvents.propTypes = {
+  suggestions: PropTypes.arrayOf(PropTypes.object),
 };
 
-const Agenda = ({ rsvped, others }) => {
+const Agenda = () => {
   const routes = useSelector(getRoutes);
   const is2022 = useSelector(getIs2022);
 
+  const { data: rsvped } = useSWR("/api/evenements/rsvped");
+  const { data: suggestions } = useSWR("/api/evenements/suggestions");
+
   const rsvpedEvents = React.useMemo(
     () =>
-      Array.isArray(rsvped)
-        ? rsvped.map((event) => ({
-            ...event,
-            schedule: Interval.fromDateTimes(
-              DateTime.fromISO(event.startTime).setLocale("fr"),
-              DateTime.fromISO(event.endTime).setLocale("fr")
-            ),
-          }))
-        : [],
+      rsvped &&
+      rsvped.map((event) => ({
+        ...event,
+        schedule: Interval.fromDateTimes(
+          DateTime.fromISO(event.startTime).setLocale("fr"),
+          DateTime.fromISO(event.endTime).setLocale("fr")
+        ),
+      })),
     [rsvped]
-  );
-
-  const otherEvents = React.useMemo(
-    () => (Array.isArray(others) ? others : []),
-    [others]
   );
 
   return (
@@ -303,10 +301,11 @@ const Agenda = ({ rsvped, others }) => {
           </div>
         </TopBar>
       </header>
-      {rsvpedEvents.length > 0 || otherEvents.length > 0 ? (
+      {(rsvpedEvents && rsvpedEvents.length > 0) ||
+      (suggestions && suggestions.length > 0) ? (
         <Row style={{ marginBottom: "4rem" }}>
           <Column grow>
-            {rsvpedEvents.length > 0 && (
+            {rsvpedEvents && rsvpedEvents.length > 0 && (
               <>
                 <h2 style={{ marginTop: 0 }}>Mes événements</h2>
                 {rsvpedEvents.map((event) => (
@@ -315,7 +314,9 @@ const Agenda = ({ rsvped, others }) => {
                 <h2>Autres événements près de chez moi</h2>
               </>
             )}
-            {otherEvents.length > 0 ? <OtherEvents others={others} /> : null}
+            {suggestions && suggestions.length > 0 ? (
+              <SuggestionsEvents suggestions={suggestions} />
+            ) : null}
           </Column>
         </Row>
       ) : null}
@@ -345,7 +346,7 @@ Agenda.propTypes = {
       endTime: PropTypes.string,
     })
   ),
-  others: PropTypes.arrayOf(
+  suggestions: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
       startTime: PropTypes.string,

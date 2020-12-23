@@ -13,6 +13,7 @@ import Button from "@agir/front/genericComponents/Button";
 import style from "@agir/front/genericComponents/_variables.scss";
 import { useSelector } from "@agir/front/globalContext/GlobalContext";
 import { getRoutes } from "@agir/front/globalContext/reducers";
+import useSWR from "swr";
 
 const TopBar = styled.div`
   display: flex;
@@ -63,12 +64,15 @@ const GroupList = styled.article`
   }
 `;
 
-const GroupsPage = ({ data }) => {
+const GroupsPage = () => {
   const routes = useSelector(getRoutes);
+
+  const { data: groupList } = useSWR("/api/groupes");
 
   const groups = React.useMemo(
     () =>
-      data.map(({ discountCodes, ...group }) => ({
+      groupList &&
+      groupList.map(({ discountCodes, ...group }) => ({
         ...group,
         discountCodes: discountCodes.map(({ code, expirationDate }) => ({
           code,
@@ -78,11 +82,11 @@ const GroupsPage = ({ data }) => {
           }),
         })),
       })),
-    [data]
+    [groupList]
   );
 
   const hasOwnGroups = React.useMemo(
-    () => groups.some((group) => group.isMember),
+    () => groups && groups.some((group) => group.isMember),
     [groups]
   );
 
@@ -112,10 +116,10 @@ const GroupsPage = ({ data }) => {
           ) : null}
         </div>
       </TopBar>
-      {!hasOwnGroups ? (
+      {groups && !hasOwnGroups ? (
         <Onboarding type="group__suggestions" routes={routes} />
       ) : null}
-      {groups.length > 0 && (
+      {groups && groups.length > 0 && (
         <GroupList>
           {groups.map((group) => (
             <GroupCard
@@ -129,7 +133,7 @@ const GroupsPage = ({ data }) => {
           ))}
         </GroupList>
       )}
-      {!hasOwnGroups ? (
+      {groups && !hasOwnGroups ? (
         <Onboarding type="group__creation" routes={routes} />
       ) : null}
     </>
@@ -137,7 +141,7 @@ const GroupsPage = ({ data }) => {
 };
 
 GroupsPage.propTypes = {
-  data: PropTypes.arrayOf(PropTypes.shape(GroupCard.propTypes)),
+  groupList: PropTypes.arrayOf(PropTypes.shape(GroupCard.propTypes)),
 };
 
 export default GroupsPage;
