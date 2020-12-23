@@ -261,14 +261,21 @@ const Agenda = ({ rsvped, others }) => {
 
   const rsvpedEvents = React.useMemo(
     () =>
-      rsvped.map((event) => ({
-        ...event,
-        schedule: Interval.fromDateTimes(
-          DateTime.fromISO(event.startTime).setLocale("fr"),
-          DateTime.fromISO(event.endTime).setLocale("fr")
-        ),
-      })),
+      Array.isArray(rsvped)
+        ? rsvped.map((event) => ({
+            ...event,
+            schedule: Interval.fromDateTimes(
+              DateTime.fromISO(event.startTime).setLocale("fr"),
+              DateTime.fromISO(event.endTime).setLocale("fr")
+            ),
+          }))
+        : [],
     [rsvped]
+  );
+
+  const otherEvents = React.useMemo(
+    () => (Array.isArray(others) ? others : []),
+    [others]
   );
 
   return (
@@ -280,23 +287,23 @@ const Agenda = ({ rsvped, others }) => {
             {routes.createEvent ? (
               <Button
                 small
-                as="a"
+                as="Link"
                 color="secondary"
-                href={routes.createEvent}
+                route="createEvent"
                 icon="plus"
               >
                 Créer un événement
               </Button>
             ) : null}
             {routes.eventMapPage ? (
-              <Button small as="a" href={routes.eventMapPage} icon="map">
+              <Button small as="Link" route="eventMapPage" icon="map">
                 Carte
               </Button>
             ) : null}
           </div>
         </TopBar>
       </header>
-      {rsvpedEvents.length > 0 || others.length > 0 ? (
+      {rsvpedEvents.length > 0 || otherEvents.length > 0 ? (
         <Row style={{ marginBottom: "4rem" }}>
           <Column grow>
             {rsvpedEvents.length > 0 && (
@@ -308,7 +315,7 @@ const Agenda = ({ rsvped, others }) => {
                 <h2>Autres événements près de chez moi</h2>
               </>
             )}
-            {others.length > 0 ? <OtherEvents others={others} /> : null}
+            {otherEvents.length > 0 ? <OtherEvents others={others} /> : null}
           </Column>
         </Row>
       ) : null}
