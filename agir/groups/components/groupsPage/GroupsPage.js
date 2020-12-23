@@ -7,7 +7,7 @@ import Card from "@agir/front/genericComponents/Card";
 import GroupCard from "@agir/groups/groupComponents/GroupCard";
 import Onboarding from "@agir/front/genericComponents/Onboarding";
 import { DateTime } from "luxon";
-import Layout, { LayoutTitle } from "@agir/front/dashboardComponents/Layout";
+import { LayoutTitle } from "@agir/front/dashboardComponents/Layout";
 import Button from "@agir/front/genericComponents/Button";
 
 import style from "@agir/front/genericComponents/_variables.scss";
@@ -87,7 +87,7 @@ const GroupsPage = ({ data }) => {
   );
 
   return (
-    <Layout active="groups" smallBackgroundColor={style.black25}>
+    <>
       <Helmet>
         <title>Mes groupes - Action populaire</title>
       </Helmet>
@@ -132,7 +132,7 @@ const GroupsPage = ({ data }) => {
       {!hasOwnGroups ? (
         <Onboarding type="group__creation" routes={routes} />
       ) : null}
-    </Layout>
+    </>
   );
 };
 
