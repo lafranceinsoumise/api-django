@@ -1,6 +1,6 @@
 import { Emoji, Picker } from "emoji-mart";
 import PropTypes from "prop-types";
-import React, { useState, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { animated, useTransition } from "react-spring";
 import styled from "styled-components";
 
@@ -109,6 +109,14 @@ const StyledTrigger = styled.button`
 const StyledPickerWrapper = styled(animated.div)`
   position: absolute;
   width: 350px;
+  ${({ $position }) => {
+    switch ($position) {
+      case "left":
+        return "left: 0;";
+      default:
+        return "right: 0;";
+    }
+  }}
   right: 0;
   top: 100%;
   text-align: left;
@@ -122,6 +130,7 @@ const StyledPickerWrapper = styled(animated.div)`
     right: 0;
     width: 100%;
     z-index: 1;
+    transform: none;
   }
 `;
 
@@ -139,7 +148,11 @@ const slideInTransition = {
 
 const EmojiPicker = (props) => {
   const { onSelect, format, small } = props;
+
   const [isOpen, setIsOpen] = useState(false);
+  const [position, setPosition] = useState("right");
+
+  const triggerRef = useRef(null);
 
   const toggleOpen = useCallback(() => {
     setIsOpen((state) => !state);
@@ -162,16 +175,30 @@ const EmojiPicker = (props) => {
 
   const transition = useTransition(isOpen, null, slideInTransition);
 
-  React.useEffect(() => {
+  useEffect(() => {
     isOpen && document.addEventListener("keydown", handleKeyClose);
     return () => document.removeEventListener("keydown", handleKeyClose);
   }, [isOpen, handleKeyClose]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const { left, right } =
+      (triggerRef.current && triggerRef.current.getBoundingClientRect()) || {};
+    if (typeof left !== "number" || typeof right !== "number") {
+      return;
+    }
+    window.innerWidth - right > left
+      ? setPosition("left")
+      : setPosition("right");
+  }, []);
 
   return (
     <>
       <StyledOverlay onClick={handleClose} $isOpen={isOpen} />
       <StyledWrapper>
-        <StyledTrigger type="button" onClick={toggleOpen}>
+        <StyledTrigger ref={triggerRef} type="button" onClick={toggleOpen}>
           <StyledTriggerIcon $isOpen={isOpen} $size={small ? "1rem" : "1.5rem"}>
             <RawFeatherIcon
               name="smile"
@@ -184,7 +211,7 @@ const EmojiPicker = (props) => {
         {transition.map(
           ({ item, key, props }) =>
             item && (
-              <StyledPickerWrapper key={key} style={props}>
+              <StyledPickerWrapper key={key} style={props} $position={position}>
                 <Picker
                   autoFocus
                   showPreview={false}
