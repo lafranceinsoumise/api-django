@@ -4,7 +4,7 @@ import Trigger from "./Trigger";
 
 export default {
   component: Trigger,
-  title: "Form/ChatMessageModal/Trigger",
+  title: "Form/MessageModal/Trigger",
 };
 
 const user = {

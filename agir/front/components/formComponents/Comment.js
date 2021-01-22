@@ -143,7 +143,7 @@ const StyledWrapper = styled(animated.div)`
   }
 `;
 
-const ChatCommentField = (props) => {
+const CommentField = (props) => {
   const { id, author, message, date, onEdit, onDelete, onReport } = props;
 
   const transitions = useTransition(true, null, {
@@ -213,7 +213,7 @@ const ChatCommentField = (props) => {
     </StyledWrapper>
   ));
 };
-ChatCommentField.propTypes = {
+CommentField.propTypes = {
   id: PropTypes.string.isRequired,
   author: PropTypes.shape({
     fullName: PropTypes.string.isRequired,
@@ -225,4 +225,4 @@ ChatCommentField.propTypes = {
   onDelete: PropTypes.func,
   onReport: PropTypes.func,
 };
-export default ChatCommentField;
+export default CommentField;

@@ -136,7 +136,7 @@ const StyledWrapper = styled.form`
   }
 `;
 
-const ChatCommentField = (props) => {
+const CommentField = (props) => {
   const { user, initialValue, id, onSend, isLoading, disabled } = props;
 
   const fieldWrapperRef = useRef(null);
@@ -239,7 +239,7 @@ const ChatCommentField = (props) => {
     </StyledWrapper>
   );
 };
-ChatCommentField.propTypes = {
+CommentField.propTypes = {
   user: PropTypes.shape({
     fullName: PropTypes.string.isRequired,
     avatar: PropTypes.string,
@@ -250,4 +250,4 @@ ChatCommentField.propTypes = {
   isLoading: PropTypes.bool,
   disabled: PropTypes.bool,
 };
-export default ChatCommentField;
+export default CommentField;

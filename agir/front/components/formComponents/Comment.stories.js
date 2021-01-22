@@ -1,10 +1,10 @@
 import React from "react";
 
-import ChatComment from "./ChatComment";
+import Comment from "./Comment";
 
 export default {
-  component: ChatComment,
-  title: "Form/ChatComment",
+  component: Comment,
+  title: "Form/Comment",
   argTypes: {
     onEdit: { action: "Edit" },
     onDelete: { action: "Delete" },
@@ -34,14 +34,14 @@ const Template = ({ hasActions, onEdit, onDelete, onReport, ...args }) => {
         }}
       >
         {hasActions ? (
-          <ChatComment
+          <Comment
             {...args}
             onEdit={onEdit}
             onDelete={onDelete}
             onReport={onReport}
           />
         ) : (
-          <ChatComment {...args} />
+          <Comment {...args} />
         )}
       </div>
     </div>

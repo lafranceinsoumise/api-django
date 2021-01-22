@@ -1,10 +1,10 @@
 import React from "react";
 
-import ChatMessageModal from "./index";
+import MessageModal from "./index";
 
 export default {
-  component: ChatMessageModal,
-  title: "Form/ChatMessageModal",
+  component: MessageModal,
+  title: "Form/MessageModal",
 };
 
 const user = {
@@ -79,7 +79,7 @@ export const Default = () => {
           margin: "0 auto",
         }}
       >
-        <ChatMessageModal
+        <MessageModal
           key={messages.length}
           isLoading={isLoading}
           onSend={handleSend}

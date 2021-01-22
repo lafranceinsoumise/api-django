@@ -2,7 +2,7 @@ import Modal from "./Modal";
 
 export default {
   component: Modal,
-  title: "Form/ChatMessageModal/Modal",
+  title: "Form/MessageModal/Modal",
 };
 
 const Template = Modal;

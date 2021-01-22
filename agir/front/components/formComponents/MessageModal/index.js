@@ -4,7 +4,7 @@ import React, { useCallback, useState } from "react";
 import Trigger from "./Trigger";
 import Modal from "./Modal";
 
-const ChatMessageModal = (props) => {
+const MessageModal = (props) => {
   const {
     user,
     message,
@@ -42,7 +42,7 @@ const ChatMessageModal = (props) => {
     </>
   );
 };
-ChatMessageModal.propTypes = {
+MessageModal.propTypes = {
   events: PropTypes.arrayOf(PropTypes.object),
   selectedEvent: PropTypes.object,
   loadMoreEvents: PropTypes.func,
@@ -51,4 +51,4 @@ ChatMessageModal.propTypes = {
   user: PropTypes.object,
   isLoading: PropTypes.bool,
 };
-export default ChatMessageModal;
+export default MessageModal;

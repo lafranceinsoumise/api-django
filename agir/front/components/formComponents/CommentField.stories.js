@@ -1,11 +1,11 @@
 import React from "react";
 
-import ChatCommentField from "./ChatCommentField";
-import ChatComment from "./ChatComment";
+import CommentField from "./CommentField";
+import Comment from "./Comment";
 
 export default {
-  component: ChatCommentField,
-  title: "Form/ChatCommentField",
+  component: CommentField,
+  title: "Form/CommentField",
   argTypes: {
     onChange: { table: { disable: true } },
   },
@@ -67,7 +67,7 @@ export const Default = () => {
           margin: "0 auto",
         }}
       >
-        <ChatCommentField
+        <CommentField
           key={messages.length}
           isLoading={isLoading}
           onSend={handleSend}
@@ -79,7 +79,7 @@ export const Default = () => {
   );
 };
 
-export const WithChatComments = () => {
+export const WithComments = () => {
   const [messages, setMessages] = React.useState([
     {
       id: 0,
@@ -129,7 +129,7 @@ export const WithChatComments = () => {
           }}
           key={message.id}
         >
-          <ChatComment {...message} />
+          <Comment {...message} />
         </div>
       ))}
       <div
@@ -140,7 +140,7 @@ export const WithChatComments = () => {
           margin: "0 auto",
         }}
       >
-        <ChatCommentField
+        <CommentField
           key={messages.length}
           isLoading={isLoading}
           onSend={handleSend}
