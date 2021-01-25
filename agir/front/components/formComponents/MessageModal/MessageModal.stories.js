@@ -68,6 +68,11 @@ export const Default = () => {
     });
   }, []);
 
+  const handleDismiss = React.useCallback(() => {
+    setVisibleEvents(events.slice(0, 3));
+    setEditedMessage(null);
+  }, []);
+
   return (
     <div
       style={{
@@ -88,6 +93,7 @@ export const Default = () => {
           key={messages.length}
           isLoading={isLoading}
           onSend={handleSave}
+          onDismiss={handleDismiss}
           user={user}
           events={visibleEvents}
           loadMoreEvents={

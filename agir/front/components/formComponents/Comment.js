@@ -174,18 +174,19 @@ const CommentField = (props) => {
     immediate: true,
   });
 
-  const hasActions = useMemo(() => {
-    return (
-      isAuthor &&
-      (typeof onDelete === "function" || typeof onReport === "function")
-    );
-  }, [isAuthor, onDelete, onReport]);
+  const hasActions = useMemo(
+    () =>
+      isAuthor
+        ? typeof onDelete === "function"
+        : typeof onReport === "function",
+    [isAuthor, onDelete, onReport]
+  );
 
   const handleDelete = useCallback(() => {
     onDelete && onDelete(message);
   }, [message, onDelete]);
 
-  const handleFlag = useCallback(() => {
+  const handleReport = useCallback(() => {
     onReport && onReport(message);
   }, [message, onReport]);
 
@@ -208,14 +209,14 @@ const CommentField = (props) => {
           <StyledAction>
             <InlineMenu triggerIconName="more-horizontal" triggerSize="1rem">
               <StyledInlineMenuItems>
-                {onDelete && (
+                {isAuthor && onDelete && (
                   <button onClick={handleDelete}>
                     <RawFeatherIcon name="x" color={style.primary500} />
                     Supprimer
                   </button>
                 )}
-                {onReport && (
-                  <button onClick={handleFlag}>
+                {!isAuthor && onReport && (
+                  <button onClick={handleReport}>
                     <RawFeatherIcon name="flag" color={style.primary500} />
                     Signaler
                   </button>

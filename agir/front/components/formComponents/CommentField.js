@@ -6,10 +6,37 @@ import style from "@agir/front/genericComponents/_variables.scss";
 
 import AnimatedMoreHorizontal from "@agir/front/genericComponents/AnimatedMoreHorizontal";
 import Avatar from "@agir/front/genericComponents/Avatar";
-import FeatherIcon from "@agir/front/genericComponents/FeatherIcon";
+import { RawFeatherIcon } from "@agir/front/genericComponents/FeatherIcon";
 import TextField from "@agir/front/formComponents/TextField";
 import EmojiPicker from "@agir/front/formComponents/EmojiPicker";
 
+const StyledCommentButton = styled.button`
+  display: flex;
+  width: 100%;
+  margin: 0;
+  border-radius: 8px;
+  border: 1px solid ${style.black100};
+  padding: 0.5rem 0.75rem;
+  text-decoration: none;
+  background-color: ${({ $disabled }) =>
+    $disabled ? style.black50 : style.white};
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: ${style.black500};
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  &:hover,
+  &:focus {
+    outline: none;
+    background-color: ${style.black50};
+    transition: background-color 250ms ease-in-out;
+  }
+`;
 const StyledField = styled.div``;
 const StyledAction = styled.div``;
 const StyledMessage = styled.div``;
@@ -42,13 +69,14 @@ const StyledWrapper = styled.form`
     transition: background-color 250ms ease-in-out;
 
     @media (max-width: ${style.collapse}px) {
-      position: ${({ $isExpanded }) => ($isExpanded ? "fixed" : "static")};
+      position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      border: ${({ $isExpanded }) =>
-        $isExpanded ? "none" : `1px solid ${style.black100}`};
-      border-radius: ${({ $isExpanded }) => ($isExpanded ? "0" : "8")}px;
+      z-index: 1;
+      border: none;
+      box-shadow: ${style.elaborateShadow};
+      border-radius: 0;
       max-height: 50vh;
     }
 
@@ -104,6 +132,15 @@ const StyledWrapper = styled.form`
           $isExpanded ? "hidden" : "visible"};
       }
     }
+
+    & > ${RawFeatherIcon} {
+      display: none;
+      @media (max-width: ${style.collapse}px) {
+        display: inline-block;
+        opacity: 0.3;
+        transform: rotate(45deg);
+      }
+    }
   }
 
   ${StyledAction} {
@@ -135,6 +172,22 @@ const StyledWrapper = styled.form`
     }
   }
 `;
+
+export const CommentButton = (props) => {
+  const { onClick } = props;
+  return onClick ? (
+    <StyledCommentButton onClick={onClick}>
+      Écrire un commentaire
+    </StyledCommentButton>
+  ) : null;
+};
+CommentButton.propTypes = {
+  user: PropTypes.shape({
+    fullName: PropTypes.string.isRequired,
+    avatar: PropTypes.string,
+  }).isRequired,
+  onClick: PropTypes.func,
+};
 
 const CommentField = (props) => {
   const { user, initialValue, id, onSend, isLoading, disabled } = props;
@@ -213,7 +266,7 @@ const CommentField = (props) => {
           ) : (
             <>
               <p>Écrire un commentaire</p>
-              <FeatherIcon name="smile" color={style.black500} />
+              <RawFeatherIcon name="send" color={style.primary500} small />
             </>
           )}
         </StyledField>
@@ -227,7 +280,7 @@ const CommentField = (props) => {
                 disabled={!value}
                 aria-label="Envoyer le commentaire"
               >
-                <FeatherIcon
+                <RawFeatherIcon
                   name="send"
                   color={value ? style.primary500 : style.black500}
                 />

@@ -56,6 +56,9 @@ const StyledOption = styled.button`
   span {
     flex: 1 1 auto;
     margin: 0 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
     strong,
     em {

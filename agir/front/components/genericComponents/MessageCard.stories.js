@@ -100,6 +100,7 @@ Default.args = {
       groups: [{ id: "A", name: "Groupe d'action 1" }],
     },
   },
+  commentCount: 2,
   comments: [
     {
       id: "comment-1",

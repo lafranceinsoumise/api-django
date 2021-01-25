@@ -4,6 +4,7 @@ import { useTransition, animated } from "react-spring";
 import styled from "styled-components";
 
 import style from "@agir/front/genericComponents/_variables.scss";
+import { useDisableBodyScroll } from "@agir/lib/utils/hooks";
 
 const slideInTransition = {
   from: { opacity: 0, paddingTop: "2%" },
@@ -20,7 +21,7 @@ const fadeInTransition = {
 const Overlay = styled(animated.div)`
   width: 100%;
   height: 100%;
-  position: absolute;
+  position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
@@ -43,7 +44,6 @@ AnimatedOverlay.propTypes = {
   shouldShow: PropTypes.bool,
   onClick: PropTypes.func,
   className: PropTypes.string,
-  noScroll: PropTypes.bool,
 };
 
 const ModalContent = styled(animated.div)`
@@ -78,13 +78,14 @@ const ModalFrame = styled.div`
 `;
 
 const Modal = (props) => {
-  const { shouldShow = false, children, onClose } = props;
+  const { shouldShow = false, children, onClose, noScroll } = props;
 
+  const modalRef = useDisableBodyScroll(noScroll, shouldShow);
   const transitions = useTransition(shouldShow, null, slideInTransition);
 
   return transitions.map(({ item, key, props }) =>
     item ? (
-      <ModalFrame key={key}>
+      <ModalFrame key={key} ref={modalRef}>
         <AnimatedOverlay onClick={onClose} shouldShow={shouldShow} />
         <ModalContent style={props}>{children}</ModalContent>
       </ModalFrame>
@@ -95,6 +96,7 @@ Modal.propTypes = {
   shouldShow: PropTypes.bool,
   children: PropTypes.node,
   onClick: PropTypes.func,
+  noScroll: PropTypes.bool,
 };
 
 export default Modal;

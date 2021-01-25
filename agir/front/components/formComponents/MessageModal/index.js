@@ -5,7 +5,15 @@ import Trigger from "./Trigger";
 import Modal from "./Modal";
 
 const MessageModal = (props) => {
-  const { user, message, onSend, events, loadMoreEvents, isLoading } = props;
+  const {
+    user,
+    message,
+    onSend,
+    onDismiss,
+    events,
+    loadMoreEvents,
+    isLoading,
+  } = props;
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -15,11 +23,12 @@ const MessageModal = (props) => {
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
-  }, []);
+    onDismiss && onDismiss();
+  }, [onDismiss]);
 
   useMemo(() => {
-    message ? setIsOpen(true) : setIsOpen(false);
-  }, [message]);
+    message ? handleOpen() : handleClose();
+  }, [message, handleOpen, handleClose]);
 
   return (
     <>
@@ -48,6 +57,7 @@ MessageModal.propTypes = {
     linkedEvent: PropTypes.object,
   }),
   onSend: PropTypes.func.isRequired,
+  onDismiss: PropTypes.func,
   user: PropTypes.object,
   isLoading: PropTypes.bool,
 };

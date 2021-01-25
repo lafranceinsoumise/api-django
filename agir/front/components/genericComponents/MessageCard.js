@@ -15,8 +15,11 @@ import EventCard from "@agir/front/genericComponents/EventCard";
 import InlineMenu from "@agir/front/genericComponents/InlineMenu";
 import PageFadeIn from "@agir/front/genericComponents/PageFadeIn";
 import { RawFeatherIcon } from "@agir/front/genericComponents/FeatherIcon";
+import { ResponsiveLayout } from "@agir/front/genericComponents/grid";
 
-import CommentField from "@agir/front/formComponents/CommentField";
+import CommentField, {
+  CommentButton,
+} from "@agir/front/formComponents/CommentField";
 import Comment from "@agir/front/formComponents/Comment";
 
 const StyledInlineMenuItems = styled.div`
@@ -192,8 +195,22 @@ const StyledHeader = styled.div`
     }
   }
 `;
+const StyledCommentCount = styled.p`
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  color: ${style.primary500};
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 1rem 0;
+
+  ${RawFeatherIcon} {
+    width: 1rem;
+    height: 1rem;
+  }
+`;
 const StyledComments = styled.div`
-  & > * {
+  && > * {
     margin-top: 1rem;
   }
 `;
@@ -205,6 +222,7 @@ const StyledWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   align-items: flex-start;
+  background-color: white;
 
   @media (max-width: ${style.collapse}px) {
     padding: 1.5rem 1rem;
@@ -213,6 +231,11 @@ const StyledWrapper = styled.div`
 
   & + & {
     border-top: 1px solid ${style.black100};
+
+    @media (max-width: ${style.collapse}px) {
+      margin-top: 1rem;
+      border-top: none;
+    }
   }
 
   & > ${Avatar} {
@@ -245,7 +268,9 @@ const MessageCard = (props) => {
     message,
     messageURL,
     comments,
+    commentCount,
     isLoading,
+    onClick,
     onComment,
     onDelete,
     onEdit,
@@ -261,14 +286,17 @@ const MessageCard = (props) => {
   );
   const [isURLCopied, copyURL] = useCopyToClipboard(encodedMessageURL);
 
-  const hasActions = useMemo(() => {
-    return (
-      isAuthor &&
-      (typeof onEdit === "function" ||
-        typeof onDelete === "function" ||
-        typeof onReport === "function")
-    );
-  }, [isAuthor, onEdit, onDelete, onReport]);
+  const hasActions = useMemo(
+    () =>
+      isAuthor
+        ? typeof onEdit === "function" || typeof onDelete === "function"
+        : typeof onReport === "function",
+    [isAuthor, onEdit, onDelete, onReport]
+  );
+
+  const handleClick = useCallback(() => {
+    onClick && onClick(message);
+  }, [message, onClick]);
 
   const handleEdit = useCallback(() => {
     onEdit && onEdit(message);
@@ -278,9 +306,22 @@ const MessageCard = (props) => {
     onDelete && onDelete(message);
   }, [message, onDelete]);
 
-  const handleFlag = useCallback(() => {
+  const handleReport = useCallback(() => {
     onReport && onReport(message);
   }, [message, onReport]);
+
+  const handleComment = useCallback(
+    (comment) => {
+      onComment && onComment(comment, message);
+    },
+    [message, onComment]
+  );
+  const handleDeleteComment = useCallback(
+    (comment) => {
+      onDelete && onDelete(comment, message);
+    },
+    [message, onDelete]
+  );
 
   return (
     <StyledWrapper>
@@ -290,7 +331,7 @@ const MessageCard = (props) => {
           <Avatar {...author} />
           <h4>
             <strong>{author.fullName}</strong>
-            <em>{created ? timeAgo(created) : null}</em>
+            <em onClick={handleClick}>{created ? timeAgo(created) : null}</em>
           </h4>
           <StyledAction>
             {encodedMessageURL ? (
@@ -329,20 +370,20 @@ const MessageCard = (props) => {
             {hasActions ? (
               <InlineMenu triggerIconName="more-horizontal" triggerSize="1rem">
                 <StyledInlineMenuItems>
-                  {onEdit && (
+                  {isAuthor && onEdit && (
                     <button onClick={handleEdit} disabled={isLoading}>
                       <RawFeatherIcon name="edit-2" color={style.primary500} />
                       Modifier
                     </button>
                   )}
-                  {onDelete && (
+                  {isAuthor && onDelete && (
                     <button onClick={handleDelete} disabled={isLoading}>
                       <RawFeatherIcon name="x" color={style.primary500} />
                       Supprimer
                     </button>
                   )}
-                  {onReport && (
-                    <button onClick={handleFlag} disabled={isLoading}>
+                  {!isAuthor && onReport && (
+                    <button onClick={handleReport} disabled={isLoading}>
                       <RawFeatherIcon name="flag" color={style.primary500} />
                       Signaler
                     </button>
@@ -352,12 +393,18 @@ const MessageCard = (props) => {
             ) : null}
           </StyledAction>
         </StyledHeader>
-        <StyledContent>
+        <StyledContent onClick={handleClick}>
           {content.split("\n").map((paragraph, i) => (
             <p key={i + "__" + paragraph}>{paragraph}</p>
           ))}
         </StyledContent>
         {event ? <EventCard {...event} /> : null}
+        {typeof commentCount === "number" && commentCount > 1 ? (
+          <StyledCommentCount onClick={handleClick}>
+            <RawFeatherIcon name="message-circle" color={style.primary500} />
+            &ensp;{commentCount} commentaires
+          </StyledCommentCount>
+        ) : null}
         <PageFadeIn ready={!!comments}>
           <StyledComments>
             {Array.isArray(comments) && comments.length > 0
@@ -365,19 +412,21 @@ const MessageCard = (props) => {
                   <Comment
                     key={comment.id}
                     message={comment}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
+                    onDelete={handleDeleteComment}
                     onReport={onReport}
                     isAuthor={comment.author.id === user.id}
                   />
                 ))
               : null}
             {onComment ? (
-              <CommentField
+              <ResponsiveLayout
+                MobileLayout={CommentButton}
+                DesktopLayout={CommentField}
                 key={comments.length}
                 isLoading={isLoading}
                 user={user}
-                onSend={onComment}
+                onSend={handleComment}
+                onClick={handleClick}
               />
             ) : null}
           </StyledComments>
@@ -404,6 +453,8 @@ MessageCard.propTypes = {
   }).isRequired,
   messageURL: PropTypes.string,
   comments: PropTypes.arrayOf(PropTypes.object),
+  commentCount: PropTypes.number,
+  onClick: PropTypes.func,
   onComment: PropTypes.func,
   onDelete: PropTypes.func,
   onEdit: PropTypes.func,

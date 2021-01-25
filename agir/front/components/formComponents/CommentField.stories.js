@@ -1,6 +1,6 @@
 import React from "react";
 
-import CommentField from "./CommentField";
+import CommentField, { CommentButton } from "./CommentField";
 import Comment from "./Comment";
 
 export default {
@@ -150,4 +150,8 @@ export const WithComments = () => {
       </div>
     </div>
   );
+};
+
+export const ButtonOnly = () => {
+  return <CommentButton user={user} onClick={() => {}} />;
 };

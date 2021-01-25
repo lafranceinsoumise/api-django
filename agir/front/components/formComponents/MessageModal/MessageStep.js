@@ -84,6 +84,10 @@ const StyledWrapper = styled.div`
     textarea {
       max-height: 12rem;
 
+      @media (max-width: ${style.collapse}px) {
+        max-height: none;
+      }
+
       &,
       &:focus,
       &:hover {

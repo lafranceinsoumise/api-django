@@ -85,6 +85,7 @@ const StyledModalContent = styled.div`
   @media (max-width: ${style.collapse}px) {
     border-radius: 0;
     max-width: 100%;
+    min-height: 100vh;
     margin: 0;
   }
   ${StyledModalHeader} {
@@ -149,6 +150,7 @@ const Modal = (props) => {
     <ModalWrapper
       shouldShow={shouldShow}
       onClose={isLoading ? undefined : onClose}
+      noScroll
     >
       <StyledModalContent $isLoading={isLoading}>
         <StyledModalHeader>
