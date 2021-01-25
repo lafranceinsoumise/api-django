@@ -47,17 +47,22 @@ const events = [
 export const Default = () => {
   const [messages, setMessages] = React.useState([]);
   const [visibleEvents, setVisibleEvents] = React.useState(events.slice(0, 3));
+  const [editedMessage, setEditedMessage] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const loadMoreEvents = React.useCallback(() => {
     setVisibleEvents(events);
   }, []);
-  const handleSend = React.useCallback(async (message) => {
+  const handleSave = React.useCallback(async (message) => {
+    setIsLoading(true);
     await new Promise((resolve) => {
-      setIsLoading(true);
       setTimeout(() => {
         setIsLoading(false);
-        setMessages((state) => [...state, message]);
+        setMessages((state) => [
+          ...state.filter((m) => m.id !== message.id),
+          { ...message, id: message.id || String(Date.now()) },
+        ]);
         setVisibleEvents(events.slice(0, 3));
+        setEditedMessage(null);
         resolve();
       }, 2000);
     });
@@ -82,12 +87,15 @@ export const Default = () => {
         <MessageModal
           key={messages.length}
           isLoading={isLoading}
-          onSend={handleSend}
+          onSend={handleSave}
           user={user}
           events={visibleEvents}
           loadMoreEvents={
             visibleEvents.length === events.length ? undefined : loadMoreEvents
           }
+          messageId={editedMessage ? editedMessage.id : undefined}
+          message={editedMessage ? editedMessage.message : undefined}
+          selectedEvent={editedMessage ? editedMessage.event : undefined}
         />
       </div>
       {messages.map((message) => (
@@ -100,13 +108,15 @@ export const Default = () => {
             margin: "8px auto",
             fontSize: "14px",
           }}
-          key={message}
+          key={message.id}
         >
           <strong>{user.fullName}</strong>
           <br />
           {message.message}
           <br />
           <small>{message.event.name}</small>
+          <br />
+          <button onClick={() => setEditedMessage(message)}>Modifier</button>
         </p>
       ))}
     </div>

@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import style from "@agir/front/genericComponents/_variables.scss";
@@ -110,6 +110,7 @@ const Modal = (props) => {
     user,
     isLoading,
     loadMoreEvents,
+    messageId,
   } = props;
 
   const [message, setMessage] = useState(props.message || "");
@@ -136,8 +137,15 @@ const Modal = (props) => {
   }, [onClose]);
 
   const handleSend = useCallback(() => {
-    onSend({ message: message.trim(), event: selectedEvent });
-  }, [onSend, message, selectedEvent]);
+    onSend({ id: messageId, message: message.trim(), event: selectedEvent });
+  }, [onSend, messageId, message, selectedEvent]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setMessage(props.message || "");
+      setSelectedEvent(props.selectedEvent || null);
+    }
+  }, [isLoading, props.selectedEvent, props.message]);
 
   return (
     <ModalWrapper
@@ -210,6 +218,7 @@ Modal.propTypes = {
   events: PropTypes.arrayOf(PropTypes.object),
   selectedEvent: PropTypes.object,
   loadMoreEvents: PropTypes.func,
+  messageId: PropTypes.string,
   message: PropTypes.string,
   onSend: PropTypes.func.isRequired,
   user: PropTypes.object,
