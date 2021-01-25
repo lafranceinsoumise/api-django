@@ -1,20 +1,11 @@
 import PropTypes from "prop-types";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
 import Trigger from "./Trigger";
 import Modal from "./Modal";
 
 const MessageModal = (props) => {
-  const {
-    user,
-    messageId,
-    message,
-    selectedEvent,
-    onSend,
-    events,
-    loadMoreEvents,
-    isLoading,
-  } = props;
+  const { user, message, onSend, events, loadMoreEvents, isLoading } = props;
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -26,9 +17,9 @@ const MessageModal = (props) => {
     setIsOpen(false);
   }, []);
 
-  useEffect(() => {
-    messageId ? setIsOpen(true) : setIsOpen(false);
-  }, [messageId]);
+  useMemo(() => {
+    message ? setIsOpen(true) : setIsOpen(false);
+  }, [message]);
 
   return (
     <>
@@ -40,9 +31,7 @@ const MessageModal = (props) => {
         events={events}
         loadMoreEvents={loadMoreEvents}
         isLoading={isLoading}
-        messageId={messageId}
         message={message}
-        selectedEvent={selectedEvent}
         onSend={onSend}
       />
     </>
@@ -53,7 +42,11 @@ MessageModal.propTypes = {
   selectedEvent: PropTypes.object,
   loadMoreEvents: PropTypes.func,
   messageId: PropTypes.string,
-  message: PropTypes.string,
+  message: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    content: PropTypes.string,
+    linkedEvent: PropTypes.object,
+  }),
   onSend: PropTypes.func.isRequired,
   user: PropTypes.object,
   isLoading: PropTypes.bool,

@@ -51,15 +51,15 @@ const Template = ({ hasActions, onEdit, onDelete, onReport, ...args }) => {
 export const Default = Template.bind({});
 Default.args = {
   author,
-  message: "Bonjour !",
-  date: new Date().toUTCString(),
+  content: "Bonjour !",
+  created: new Date().toUTCString(),
   hasActions: false,
 };
 
 export const WithActions = Template.bind({});
 WithActions.args = {
   author,
-  message: "Bonjour !",
-  date: new Date().toUTCString(),
+  content: "Bonjour !",
+  created: new Date().toUTCString(),
   hasActions: true,
 };

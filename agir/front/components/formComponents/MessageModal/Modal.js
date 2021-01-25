@@ -110,16 +110,16 @@ const Modal = (props) => {
     user,
     isLoading,
     loadMoreEvents,
-    messageId,
+    message,
   } = props;
 
-  const [message, setMessage] = useState(props.message || "");
+  const [content, setContent] = useState((message && message.content) || "");
   const [selectedEvent, setSelectedEvent] = useState(
-    props.selectedEvent || null
+    (message && message.linkedEvent) || null
   );
 
-  const handleChangeMessage = useCallback((message) => {
-    setMessage(message);
+  const handleChangeContent = useCallback((content) => {
+    setContent(content);
   }, []);
 
   const handleSelectEvent = useCallback((event) => {
@@ -130,37 +130,35 @@ const Modal = (props) => {
     setSelectedEvent(null);
   }, []);
 
-  const handleClose = useCallback(() => {
-    setMessage("");
-    setSelectedEvent(null);
-    onClose();
-  }, [onClose]);
-
   const handleSend = useCallback(() => {
-    onSend({ id: messageId, message: message.trim(), event: selectedEvent });
-  }, [onSend, messageId, message, selectedEvent]);
+    onSend({
+      ...(message || {}),
+      content: content.trim(),
+      linkedEvent: selectedEvent,
+    });
+  }, [onSend, message, content, selectedEvent]);
 
   useEffect(() => {
-    if (!isLoading) {
-      setMessage(props.message || "");
-      setSelectedEvent(props.selectedEvent || null);
+    if (shouldShow) {
+      setContent((message && message.content) || "");
+      setSelectedEvent((message && message.linkedEvent) || null);
     }
-  }, [isLoading, props.selectedEvent, props.message]);
+  }, [shouldShow, message]);
 
   return (
     <ModalWrapper
       shouldShow={shouldShow}
-      onClose={isLoading ? undefined : handleClose}
+      onClose={isLoading ? undefined : onClose}
     >
       <StyledModalContent $isLoading={isLoading}>
         <StyledModalHeader>
           <h4>Nouveau message</h4>
-          <StyledIconButton onClick={handleClose} disabled={isLoading}>
+          <StyledIconButton onClick={onClose} disabled={isLoading}>
             <RawFeatherIcon name="x" />
           </StyledIconButton>
         </StyledModalHeader>
         <StyledModalHeader $mobile>
-          <StyledIconButton onClick={handleClose} disabled={isLoading}>
+          <StyledIconButton onClick={onClose} disabled={isLoading}>
             <RawFeatherIcon name="arrow-left" />
           </StyledIconButton>
           {selectedEvent ? (
@@ -168,7 +166,7 @@ const Modal = (props) => {
               color="secondary"
               small
               disabled={
-                !selectedEvent || !message || message.trim() > 2000 || isLoading
+                !selectedEvent || !content || content.trim() > 2000 || isLoading
               }
               onClick={handleSend}
             >
@@ -179,10 +177,10 @@ const Modal = (props) => {
         <StyledModalBody>
           {selectedEvent ? (
             <MessageStep
-              message={message}
+              content={content}
               event={selectedEvent}
               user={user}
-              onChange={handleChangeMessage}
+              onChange={handleChangeContent}
               onClearEvent={handleClearEvent}
               disabled={isLoading}
               maxLength={2000}
@@ -200,7 +198,7 @@ const Modal = (props) => {
             <Button
               color="secondary"
               disabled={
-                !selectedEvent || !message || message.trim() > 2000 || isLoading
+                !selectedEvent || !content || content.trim() > 2000 || isLoading
               }
               onClick={handleSend}
             >
@@ -218,8 +216,11 @@ Modal.propTypes = {
   events: PropTypes.arrayOf(PropTypes.object),
   selectedEvent: PropTypes.object,
   loadMoreEvents: PropTypes.func,
-  messageId: PropTypes.string,
-  message: PropTypes.string,
+  message: PropTypes.shape({
+    id: PropTypes.string,
+    content: PropTypes.string,
+    linkedEvent: PropTypes.object,
+  }),
   onSend: PropTypes.func.isRequired,
   user: PropTypes.object,
   isLoading: PropTypes.bool,

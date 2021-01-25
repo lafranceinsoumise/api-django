@@ -83,18 +83,18 @@ export const WithComments = () => {
   const [messages, setMessages] = React.useState([
     {
       id: 0,
-      message: "Bonjour !",
+      content: "Bonjour !",
       author: {
         fullName: "Quelqu'un",
         avatar: `https://avatars.dicebear.com/api/human/${String(
           Math.random()
         ).replace(".", "")}.svg?background=%23ffffff`,
       },
-      date: new Date().toUTCString(),
+      created: new Date().toUTCString(),
     },
   ]);
   const [isLoading, setIsLoading] = React.useState(false);
-  const handleSend = React.useCallback(async (message) => {
+  const handleSend = React.useCallback(async (content) => {
     await new Promise((resolve) => {
       setIsLoading(true);
       setTimeout(() => {
@@ -104,8 +104,8 @@ export const WithComments = () => {
           {
             id: state.length,
             author: user,
-            message,
-            date: new Date().toUTCString(),
+            content,
+            created: new Date().toUTCString(),
           },
         ]);
         resolve();

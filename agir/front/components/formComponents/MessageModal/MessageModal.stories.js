@@ -56,11 +56,11 @@ export const Default = () => {
     setIsLoading(true);
     await new Promise((resolve) => {
       setTimeout(() => {
-        setIsLoading(false);
         setMessages((state) => [
           ...state.filter((m) => m.id !== message.id),
           { ...message, id: message.id || String(Date.now()) },
         ]);
+        setIsLoading(false);
         setVisibleEvents(events.slice(0, 3));
         setEditedMessage(null);
         resolve();
@@ -93,9 +93,7 @@ export const Default = () => {
           loadMoreEvents={
             visibleEvents.length === events.length ? undefined : loadMoreEvents
           }
-          messageId={editedMessage ? editedMessage.id : undefined}
-          message={editedMessage ? editedMessage.message : undefined}
-          selectedEvent={editedMessage ? editedMessage.event : undefined}
+          message={editedMessage}
         />
       </div>
       {messages.map((message) => (
@@ -110,11 +108,13 @@ export const Default = () => {
           }}
           key={message.id}
         >
+          #{message.id}
+          <br />
           <strong>{user.fullName}</strong>
           <br />
-          {message.message}
+          {message.content}
           <br />
-          <small>{message.event.name}</small>
+          <small>{message.linkedEvent.name}</small>
           <br />
           <button onClick={() => setEditedMessage(message)}>Modifier</button>
         </p>

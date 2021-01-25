@@ -108,7 +108,7 @@ const StyledWrapper = styled.div`
 const MessageStep = (props) => {
   const {
     disabled,
-    message,
+    content,
     event,
     user,
     onChange,
@@ -125,9 +125,9 @@ const MessageStep = (props) => {
 
   const handleEmojiSelect = useCallback(
     (emoji) => {
-      onChange(message + emoji);
+      onChange(content + emoji);
     },
-    [onChange, message]
+    [onChange, content]
   );
 
   return (
@@ -154,8 +154,8 @@ const MessageStep = (props) => {
       <StyledMessage>
         <TextField
           textArea
-          id="message"
-          value={message}
+          id="messageContent"
+          value={content}
           onChange={handleInputChange}
           autoFocus
           disabled={disabled}
@@ -169,7 +169,7 @@ const MessageStep = (props) => {
 };
 MessageStep.propTypes = {
   disabled: PropTypes.bool,
-  message: PropTypes.string,
+  content: PropTypes.string,
   event: PropTypes.object,
   user: PropTypes.shape({
     fullName: PropTypes.string.isRequired,

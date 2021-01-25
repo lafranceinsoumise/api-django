@@ -144,7 +144,7 @@ const StyledWrapper = styled(animated.div)`
 `;
 
 const CommentField = (props) => {
-  const { id, author, message, date, onEdit, onDelete, onReport } = props;
+  const { id, author, content, created, onEdit, onDelete, onReport } = props;
 
   const transitions = useTransition(true, null, {
     from: { opacity: 0 },
@@ -179,9 +179,9 @@ const CommentField = (props) => {
         <StyledMessageContent>
           <StyledMessageHeader>
             <strong>{author.fullName}</strong>
-            <em>{date ? timeAgo(date) : null}</em>
+            <em>{created ? timeAgo(created) : null}</em>
           </StyledMessageHeader>
-          <pre>{message}</pre>
+          <pre>{content}</pre>
         </StyledMessageContent>
         {hasActions ? (
           <StyledAction>
@@ -214,13 +214,13 @@ const CommentField = (props) => {
   ));
 };
 CommentField.propTypes = {
-  id: PropTypes.string.isRequired,
+  id: PropTypes.string,
   author: PropTypes.shape({
     fullName: PropTypes.string.isRequired,
     avatar: PropTypes.string,
   }).isRequired,
-  message: PropTypes.string.isRequired,
-  date: PropTypes.string,
+  content: PropTypes.string.isRequired,
+  created: PropTypes.string,
   onEdit: PropTypes.func,
   onDelete: PropTypes.func,
   onReport: PropTypes.func,
