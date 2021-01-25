@@ -39,6 +39,7 @@ const Template = ({ hasActions, onEdit, onDelete, onReport, ...args }) => {
             onEdit={onEdit}
             onDelete={onDelete}
             onReport={onReport}
+            isAuthor
           />
         ) : (
           <Comment {...args} />
@@ -50,16 +51,20 @@ const Template = ({ hasActions, onEdit, onDelete, onReport, ...args }) => {
 
 export const Default = Template.bind({});
 Default.args = {
-  author,
-  content: "Bonjour !",
-  created: new Date().toUTCString(),
+  message: {
+    author,
+    content: "Bonjour !",
+    created: new Date().toUTCString(),
+  },
   hasActions: false,
 };
 
 export const WithActions = Template.bind({});
 WithActions.args = {
-  author,
-  content: "Bonjour !",
-  created: new Date().toUTCString(),
+  message: {
+    author,
+    content: "Bonjour !",
+    created: new Date().toUTCString(),
+  },
   hasActions: true,
 };

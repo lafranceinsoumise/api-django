@@ -129,7 +129,7 @@ export const WithComments = () => {
           }}
           key={message.id}
         >
-          <Comment {...message} />
+          <Comment message={message} />
         </div>
       ))}
       <div

@@ -53,6 +53,14 @@ const StyledInlineMenuItems = styled.div`
       outline: none;
     }
 
+    &[disabled],
+    &[disabled]:hover,
+    &[disabled]:focus {
+      opacity: 0.75;
+      text-decoration: none;
+      cursor: default;
+    }
+
     @media (max-width: ${style.collapse}px) {
       margin-bottom: 1.5rem;
       text-decoration: none;
@@ -105,6 +113,12 @@ const StyledWrapper = styled(animated.div)`
 
   ${StyledMessageHeader} {
     font-size: 0.875rem;
+    display: flex;
+    flex-direction: row;
+
+    @media (max-width: ${style.collapse}px) {
+      flex-direction: column;
+    }
 
     strong {
       font-weight: 600;
@@ -116,6 +130,10 @@ const StyledWrapper = styled(animated.div)`
       font-size: 13px;
       color: ${style.black700};
       margin-left: 0.5rem;
+
+      @media (max-width: ${style.collapse}px) {
+        margin: 0.25rem 0;
+      }
     }
   }
 
@@ -128,13 +146,14 @@ const StyledWrapper = styled(animated.div)`
       font-size: inherit;
     }
 
-    pre {
+    p {
       flex: 1 1 auto;
       margin: 0;
       padding: 0;
       font-size: inherit;
       font-family: inherit;
       line-height: 1.65;
+      min-height: 0.5rem;
     }
   }
 
@@ -144,33 +163,31 @@ const StyledWrapper = styled(animated.div)`
 `;
 
 const CommentField = (props) => {
-  const { id, author, content, created, onEdit, onDelete, onReport } = props;
+  const { message, onDelete, onReport, isAuthor } = props;
+
+  const { author, content, created } = message;
 
   const transitions = useTransition(true, null, {
     from: { opacity: 0 },
     enter: { opacity: 1 },
     leave: { opacity: 0 },
+    immediate: true,
   });
 
   const hasActions = useMemo(() => {
     return (
-      typeof onEdit === "function" &&
-      typeof onDelete === "function" &&
-      typeof onReport === "function"
+      isAuthor &&
+      (typeof onDelete === "function" || typeof onReport === "function")
     );
-  }, [onEdit, onDelete, onReport]);
-
-  const handleEdit = useCallback(() => {
-    onEdit && onEdit(id);
-  }, [id, onEdit]);
+  }, [isAuthor, onDelete, onReport]);
 
   const handleDelete = useCallback(() => {
-    onDelete && onDelete(id);
-  }, [id, onDelete]);
+    onDelete && onDelete(message);
+  }, [message, onDelete]);
 
   const handleFlag = useCallback(() => {
-    onReport && onReport(id);
-  }, [id, onReport]);
+    onReport && onReport(message);
+  }, [message, onReport]);
 
   return transitions.map(({ key, props }) => (
     <StyledWrapper key={key} style={props}>
@@ -181,18 +198,16 @@ const CommentField = (props) => {
             <strong>{author.fullName}</strong>
             <em>{created ? timeAgo(created) : null}</em>
           </StyledMessageHeader>
-          <pre>{content}</pre>
+          <p>
+            {content.split("\n").map((paragraph, i) => (
+              <p key={i + "__" + paragraph}>{paragraph}</p>
+            ))}
+          </p>
         </StyledMessageContent>
         {hasActions ? (
           <StyledAction>
             <InlineMenu triggerIconName="more-horizontal" triggerSize="1rem">
               <StyledInlineMenuItems>
-                {onEdit && (
-                  <button onClick={handleEdit}>
-                    <RawFeatherIcon name="edit-2" color={style.primary500} />
-                    Modifier
-                  </button>
-                )}
                 {onDelete && (
                   <button onClick={handleDelete}>
                     <RawFeatherIcon name="x" color={style.primary500} />
@@ -214,14 +229,16 @@ const CommentField = (props) => {
   ));
 };
 CommentField.propTypes = {
-  id: PropTypes.string,
-  author: PropTypes.shape({
-    fullName: PropTypes.string.isRequired,
-    avatar: PropTypes.string,
+  message: PropTypes.shape({
+    id: PropTypes.string,
+    author: PropTypes.shape({
+      fullName: PropTypes.string.isRequired,
+      avatar: PropTypes.string,
+    }).isRequired,
+    content: PropTypes.string.isRequired,
+    created: PropTypes.string,
   }).isRequired,
-  content: PropTypes.string.isRequired,
-  created: PropTypes.string,
-  onEdit: PropTypes.func,
+  isAuthor: PropTypes.bool,
   onDelete: PropTypes.func,
   onReport: PropTypes.func,
 };
