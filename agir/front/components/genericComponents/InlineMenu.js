@@ -56,7 +56,12 @@ MobileInlineMenu.propTypes = DesktopInlineMenu.propTypes = {
 };
 
 export const InlineMenu = (props) => {
-  const { children, triggerIconName, triggerSize } = props;
+  const {
+    children,
+    triggerIconName,
+    triggerSize,
+    shouldDismissOnClick,
+  } = props;
   const [isOpen, setIsOpen] = useState(false);
 
   const handleOpen = React.useCallback(() => setIsOpen(true), []);
@@ -71,6 +76,7 @@ export const InlineMenu = (props) => {
       isOpen={isOpen}
       onOpen={handleOpen}
       onDismiss={handleDismiss}
+      shouldDismissOnClick={shouldDismissOnClick}
     >
       {children}
     </ResponsiveLayout>
@@ -80,6 +86,7 @@ InlineMenu.propTypes = {
   children: PropTypes.node,
   triggerIconName: PropTypes.string,
   triggerSize: PropTypes.string,
+  shouldDismissOnClick: PropTypes.bool,
 };
 InlineMenu.defaultProps = {
   triggerIconName: "more-vertical",

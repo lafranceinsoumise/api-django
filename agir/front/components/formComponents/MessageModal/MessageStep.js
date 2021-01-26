@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import styled from "styled-components";
 
 import style from "@agir/front/genericComponents/_variables.scss";
@@ -120,6 +120,9 @@ const MessageStep = (props) => {
     maxLength,
   } = props;
 
+  const textFieldRef = useRef();
+  const textFieldCursorPosition = useRef();
+
   const handleInputChange = useCallback(
     (e) => {
       onChange(e.target.value);
@@ -129,10 +132,33 @@ const MessageStep = (props) => {
 
   const handleEmojiSelect = useCallback(
     (emoji) => {
-      onChange(content + emoji);
+      if (!Array.isArray(textFieldCursorPosition.current)) {
+        onChange(content + emoji);
+        return;
+      }
+      const [start, end] = textFieldCursorPosition.current;
+      const newValue = content.slice(0, start) + emoji + content.slice(end);
+      textFieldCursorPosition.current = [
+        start + emoji.length,
+        start + emoji.length,
+      ];
+      onChange(newValue);
     },
     [onChange, content]
   );
+
+  const handleEmojiOpen = useCallback(() => {
+    if (
+      textFieldRef.current &&
+      typeof textFieldRef.current.selectionStart === "number" &&
+      typeof textFieldRef.current.selectionEnd === "number"
+    ) {
+      textFieldCursorPosition.current = [
+        textFieldRef.current.selectionStart,
+        textFieldRef.current.selectionEnd,
+      ];
+    }
+  }, []);
 
   return (
     <StyledWrapper>
@@ -157,6 +183,7 @@ const MessageStep = (props) => {
       </StyledLabel>
       <StyledMessage>
         <TextField
+          ref={textFieldRef}
           textArea
           id="messageContent"
           value={content}
@@ -166,7 +193,7 @@ const MessageStep = (props) => {
           placeholder="Quoi de neuf dans votre groupe ?"
           maxLength={maxLength}
         />
-        <EmojiPicker onSelect={handleEmojiSelect} />
+        <EmojiPicker onOpen={handleEmojiOpen} onSelect={handleEmojiSelect} />
       </StyledMessage>
     </StyledWrapper>
   );

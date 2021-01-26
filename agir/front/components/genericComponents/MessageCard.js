@@ -275,6 +275,7 @@ const MessageCard = (props) => {
     onDelete,
     onEdit,
     onReport,
+    withMobileCommentField,
   } = props;
 
   const { author, content, created, linkedEvent } = message;
@@ -368,7 +369,11 @@ const MessageCard = (props) => {
               </InlineMenu>
             ) : null}
             {hasActions ? (
-              <InlineMenu triggerIconName="more-horizontal" triggerSize="1rem">
+              <InlineMenu
+                triggerIconName="more-horizontal"
+                triggerSize="1rem"
+                shouldDismissOnClick
+              >
                 <StyledInlineMenuItems>
                   {isAuthor && onEdit && (
                     <button onClick={handleEdit} disabled={isLoading}>
@@ -419,15 +424,24 @@ const MessageCard = (props) => {
                 ))
               : null}
             {onComment ? (
-              <ResponsiveLayout
-                MobileLayout={CommentButton}
-                DesktopLayout={CommentField}
-                key={comments.length}
-                isLoading={isLoading}
-                user={user}
-                onSend={handleComment}
-                onClick={handleClick}
-              />
+              withMobileCommentField ? (
+                <CommentField
+                  key={comments.length}
+                  isLoading={isLoading}
+                  user={user}
+                  onSend={handleComment}
+                />
+              ) : (
+                <ResponsiveLayout
+                  MobileLayout={CommentButton}
+                  DesktopLayout={CommentField}
+                  key={comments.length}
+                  isLoading={isLoading}
+                  user={user}
+                  onSend={handleComment}
+                  onClick={handleClick}
+                />
+              )
             ) : null}
           </StyledComments>
         </PageFadeIn>
@@ -460,5 +474,6 @@ MessageCard.propTypes = {
   onEdit: PropTypes.func,
   onReport: PropTypes.func,
   isLoading: PropTypes.bool,
+  withMobileCommentField: PropTypes.bool,
 };
 export default MessageCard;

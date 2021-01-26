@@ -146,7 +146,7 @@ const StyledWrapper = styled(animated.div)`
       font-size: inherit;
     }
 
-    p {
+    article {
       flex: 1 1 auto;
       margin: 0;
       padding: 0;
@@ -199,11 +199,11 @@ const CommentField = (props) => {
             <strong>{author.fullName}</strong>
             <em>{created ? timeAgo(created) : null}</em>
           </StyledMessageHeader>
-          <p>
+          <article>
             {content.split("\n").map((paragraph, i) => (
               <p key={i + "__" + paragraph}>{paragraph}</p>
             ))}
-          </p>
+          </article>
         </StyledMessageContent>
         {hasActions ? (
           <StyledAction>

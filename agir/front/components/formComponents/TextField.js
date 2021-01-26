@@ -1,8 +1,9 @@
 import PropTypes from "prop-types";
-import React, { useLayoutEffect, useRef } from "react";
+import React, { forwardRef, useLayoutEffect, useRef } from "react";
 import styled from "styled-components";
 
 import style from "@agir/front/genericComponents/_variables.scss";
+import { mergeRefs } from "@agir/lib/utils/react";
 
 import FeatherIcon from "@agir/front/genericComponents/FeatherIcon";
 
@@ -90,7 +91,7 @@ const StyledField = styled.label`
   }
 `;
 
-const TextField = (props) => {
+const TextField = forwardRef((props, ref) => {
   const {
     id,
     type,
@@ -106,11 +107,15 @@ const TextField = (props) => {
 
   const textAreaRef = useRef(null);
   useLayoutEffect(() => {
-    if (value && textAreaRef.current) {
-      textAreaRef.current.style.height = "inherit";
-      textAreaRef.current.style.height =
-        textAreaRef.current.scrollHeight + 4 + "px";
+    const textArea = textAreaRef.current;
+    if (value && textArea) {
+      textArea.style.height = textArea.scrollHeight + 4 + "px";
     }
+    return () => {
+      if (textArea) {
+        textArea.style.height = "inherit";
+      }
+    };
   }, [value]);
 
   return (
@@ -125,7 +130,7 @@ const TextField = (props) => {
       {textArea ? (
         <StyledTextArea
           {...rest}
-          ref={textAreaRef}
+          ref={mergeRefs(ref, textAreaRef)}
           id={id}
           type={type}
           onChange={onChange}
@@ -135,6 +140,7 @@ const TextField = (props) => {
       ) : (
         <StyledInput
           {...rest}
+          ref={ref}
           id={id}
           type={type}
           onChange={onChange}
@@ -152,7 +158,7 @@ const TextField = (props) => {
       ) : null}
     </StyledField>
   );
-};
+});
 
 TextField.propTypes = {
   value: PropTypes.any,
@@ -170,5 +176,7 @@ TextField.defaultProps = {
   type: "text",
   textArea: false,
 };
+
+TextField.displayName = "TextField";
 
 export default TextField;

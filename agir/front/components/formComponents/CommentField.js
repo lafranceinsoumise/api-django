@@ -192,7 +192,9 @@ CommentButton.propTypes = {
 const CommentField = (props) => {
   const { user, initialValue, id, onSend, isLoading, disabled } = props;
 
-  const fieldWrapperRef = useRef(null);
+  const fieldWrapperRef = useRef();
+  const textFieldRef = useRef();
+  const textFieldCursorPosition = useRef();
 
   const [isFocused, setIsFocused] = useState(false);
   const [value, setValue] = useState(initialValue || "");
@@ -224,8 +226,34 @@ const CommentField = (props) => {
     setValue(e.target.value);
   }, []);
 
-  const handleEmojiSelect = useCallback((emoji) => {
-    setValue((value) => value + emoji);
+  const handleEmojiSelect = useCallback(
+    (emoji) => {
+      if (!Array.isArray(textFieldCursorPosition.current)) {
+        setValue(value + emoji);
+        return;
+      }
+      const [start, end] = textFieldCursorPosition.current;
+      const newValue = value.slice(0, start) + emoji + value.slice(end);
+      textFieldCursorPosition.current = [
+        start + emoji.length,
+        start + emoji.length,
+      ];
+      setValue(newValue);
+    },
+    [value]
+  );
+
+  const handleEmojiOpen = useCallback(() => {
+    if (
+      textFieldRef.current &&
+      typeof textFieldRef.current.selectionStart === "number" &&
+      typeof textFieldRef.current.selectionEnd === "number"
+    ) {
+      textFieldCursorPosition.current = [
+        textFieldRef.current.selectionStart,
+        textFieldRef.current.selectionEnd,
+      ];
+    }
   }, []);
 
   const handleSend = useCallback(
@@ -251,6 +279,7 @@ const CommentField = (props) => {
           {isExpanded ? (
             <>
               <TextField
+                ref={textFieldRef}
                 textArea
                 id={id}
                 value={value}
@@ -261,7 +290,11 @@ const CommentField = (props) => {
                 disabled={disabled || isLoading}
                 placeholder="Écrire un commentaire"
               />
-              <EmojiPicker onSelect={handleEmojiSelect} small />
+              <EmojiPicker
+                onOpen={handleEmojiOpen}
+                onSelect={handleEmojiSelect}
+                small
+              />
             </>
           ) : (
             <>

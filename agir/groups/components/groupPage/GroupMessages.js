@@ -100,17 +100,21 @@ const GroupMessages = (props) => {
 
   return (
     <StyledWrapper>
-      <MessageModalTrigger user={user} onClick={handleModalOpen} />
-      <MessageModal
-        shouldShow={isModalOpen}
-        onClose={handleModalClose}
-        user={user}
-        events={events}
-        loadMoreEvents={loadMoreEvents}
-        isLoading={isLoading}
-        message={editedMessage}
-        onSend={saveMessage}
-      />
+      {createMessage ? (
+        <MessageModalTrigger user={user} onClick={handleModalOpen} />
+      ) : null}
+      {createMessage || updateMessage ? (
+        <MessageModal
+          shouldShow={isModalOpen}
+          onClose={handleModalClose}
+          user={user}
+          events={events}
+          loadMoreEvents={loadMoreEvents}
+          isLoading={isLoading}
+          message={editedMessage}
+          onSend={saveMessage}
+        />
+      ) : null}
       <StyledMessages
         ready={Array.isArray(messages)}
         wait={<Skeleton style={{ margin: "1rem 0" }} />}

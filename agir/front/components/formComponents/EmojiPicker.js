@@ -147,7 +147,7 @@ const slideInTransition = {
 };
 
 const EmojiPicker = (props) => {
-  const { onSelect, format, small } = props;
+  const { onOpen, onClose, onSelect, format, small } = props;
 
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState("right");
@@ -156,15 +156,20 @@ const EmojiPicker = (props) => {
 
   const toggleOpen = useCallback(() => {
     setIsOpen((state) => !state);
-  }, []);
+    onOpen && onOpen();
+  }, [onOpen]);
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
-  }, []);
+    onClose && onClose();
+  }, [onClose]);
 
-  const handleKeyClose = useCallback((e) => {
-    e.key === "Escape" && setIsOpen(false);
-  }, []);
+  const handleKeyClose = useCallback(
+    (e) => {
+      e.key === "Escape" && handleClose();
+    },
+    [handleClose]
+  );
 
   const handleSelect = useCallback(
     (emoji) => {
@@ -238,6 +243,8 @@ const EmojiPicker = (props) => {
 };
 EmojiPicker.propTypes = {
   onSelect: PropTypes.func.isRequired,
+  onOpen: PropTypes.func,
+  onClose: PropTypes.func,
   format: PropTypes.oneOf(["native", "id", "colons", "unified"]),
   small: PropTypes.bool,
 };
