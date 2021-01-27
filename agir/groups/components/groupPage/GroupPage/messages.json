@@ -1,6 +1,6 @@
 [
   {
-    "id": "message_1",
+    "id": "432a5071-3b8c-4bbc-9501-a3f9fd48f701",
     "created": "2021-01-01 12:00:00",
     "author": {
       "id": "Bill",
@@ -52,7 +52,7 @@
     ]
   },
   {
-    "id": "message_2",
+    "id": "432a5071-3b8c-4bbc-9501-a3f9fd48f702",
     "created": "2021-01-03 12:00:00",
     "author": {
       "id": "Isabelle",
@@ -80,7 +80,7 @@
     "comments": []
   },
   {
-    "id": "message_3",
+    "id": "432a5071-3b8c-4bbc-9501-a3f9fd48f703",
     "created": "2021-01-09 12:00:00",
     "author": {
       "id": "Bill",
@@ -118,7 +118,7 @@
     ]
   },
   {
-    "id": "message_4",
+    "id": "432a5071-3b8c-4bbc-9501-a3f9fd48f704",
     "created": "2020-12-03 12:00:00",
     "author": {
       "id": "Isabelle",
@@ -129,7 +129,7 @@
     "comments": []
   },
   {
-    "id": "message_5",
+    "id": "432a5071-3b8c-4bbc-9501-a3f9fd48f705",
     "created": "2020-12-03 12:00:00",
     "author": {
       "id": "Isabelle",

@@ -2,9 +2,10 @@ import React from "react";
 
 import group from "./group.json";
 import events from "./events.json";
+import messages from "./messages.json";
 
 import { TestGlobalContextProvider } from "@agir/front/globalContext/GlobalContext";
-import GROUP_PAGE_TABS from "./tabs.config";
+import GROUP_PAGE_ROUTES from "./routes.config";
 
 import GroupPage from "./GroupPage";
 
@@ -15,7 +16,7 @@ export default {
     activeTab: {
       control: {
         type: "select",
-        options: GROUP_PAGE_TABS.map((t) => t.slug),
+        options: GROUP_PAGE_ROUTES.map((t) => t.pathname),
       },
     },
   },
@@ -23,12 +24,28 @@ export default {
 
 const Template = (args) => (
   <TestGlobalContextProvider value={{ csrfToken: "12345" }}>
+    <div
+      style={{
+        background: "crimson",
+        position: "sticky",
+        zIndex: "999",
+        top: 0,
+        right: 0,
+        left: 0,
+        width: "100%",
+        height: "72px",
+      }}
+    />
     <GroupPage {...args} />
   </TestGlobalContextProvider>
 );
 
 export const Default = Template.bind({});
 Default.args = {
+  user: {
+    id: "bill",
+    fullName: "Bill Murray",
+  },
   isLoading: false,
   group: { ...group, isManager: false },
   groupSuggestions: [
@@ -38,7 +55,7 @@ Default.args = {
   ],
   upcomingEvents: events,
   pastEvents: events,
-  activeTab: GROUP_PAGE_TABS[0].slug,
+  activeTab: GROUP_PAGE_ROUTES[0].pathname,
 };
 export const Loading = Template.bind({});
 Loading.args = {
@@ -55,6 +72,13 @@ export const WithPastReports = Template.bind({});
 WithPastReports.args = {
   ...Default.args,
   pastEventReports: events,
+  activeTab: "comptes-rendus",
+};
+export const WithMessages = Template.bind({});
+WithMessages.args = {
+  ...Default.args,
+  pastEventReports: events,
+  messages,
   activeTab: "comptes-rendus",
 };
 export const NonMemberView = Template.bind({});

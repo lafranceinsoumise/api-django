@@ -23,7 +23,7 @@ const NavigationPage = lazy(() =>
 
 export const BASE_PATH = "/";
 
-class RouteConfig {
+export class RouteConfig {
   constructor(props) {
     Object.keys(props).forEach((key) => (this[key] = props[key]));
 
@@ -104,7 +104,13 @@ export const routeConfig = {
   }),
   groupDetails: new RouteConfig({
     id: "groupDetails",
-    pathname: "/groupes/:groupPk/:activeTab?",
+    pathname: [
+      "/groupes/:groupPk/",
+      "/groupes/:groupPk/presentation/",
+      "/groupes/:groupPk/agenda/",
+      "/groupes/:groupPk/comptes-rendus/",
+      "/groupes/:groupPk/discussion/:messagePk?/",
+    ],
     exact: true,
     label: "Details du groupe",
     Component: GroupPage,

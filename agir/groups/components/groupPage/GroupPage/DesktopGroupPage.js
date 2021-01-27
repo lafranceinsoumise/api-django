@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import React, { useMemo } from "react";
+import { Switch, Route } from "react-router-dom";
 import styled from "styled-components";
 
 import style from "@agir/front/genericComponents/_variables.scss";
@@ -23,6 +24,7 @@ import GroupDonation from "../GroupDonation";
 import GroupSuggestions from "../GroupSuggestions";
 import GroupEventList from "../GroupEventList";
 import GroupMessages from "../GroupMessages";
+import GroupPageMenu from "../GroupPageMenu";
 
 const IndexLinkAnchor = styled(Link)`
   font-weight: 600;
@@ -49,47 +51,6 @@ const IndexLinkAnchor = styled(Link)`
   @media (max-width: ${style.collapse}px) {
     padding: 0.5rem 1.375rem 0;
     margin-bottom: -1rem;
-  }
-`;
-
-const StyledMenu = styled.nav`
-  position: sticky;
-  z-index: 1;
-  top: -1px;
-  left: 0;
-  right: 0;
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: center;
-  padding: 0;
-  margin: 0 1rem;
-  background-color: white;
-  box-shadow: inset 0px -1px 0px #dfdfdf;
-
-  button {
-    flex: 0 1 auto;
-    padding: 0 1rem;
-    background-color: transparent;
-    border: none;
-    height: 80px;
-    cursor: pointer;
-    transition: all 200ms ease-in-out;
-    box-shadow: none;
-    color: ${style.black1000};
-    white-space: nowrap;
-
-    &[data-active],
-    &:hover,
-    &:focus {
-      color: ${style.primary500};
-      border: none;
-      outline: none;
-    }
-
-    &[data-active] {
-      background-size: 100%;
-      box-shadow: 0 -3px 0 ${style.primary500} inset;
-    }
   }
 `;
 
@@ -122,6 +83,103 @@ export const DesktopGroupPageSkeleton = () => (
   </Container>
 );
 
+const MessagesRoute = ({
+  user,
+  allEvents,
+  messages,
+  isLoadingMessages,
+  loadMoreMessages,
+  loadMorePastEvents,
+  createMessage,
+  updateMessage,
+  createComment,
+  reportMessage,
+  deleteMessage,
+}) =>
+  Array.isArray(messages) && messages.length > 0 ? (
+    <GroupMessages
+      user={user}
+      events={allEvents}
+      messages={messages}
+      isLoading={isLoadingMessages}
+      loadMoreMessages={loadMoreMessages}
+      loadMoreEvents={loadMorePastEvents}
+      createMessage={createMessage}
+      updateMessage={updateMessage}
+      createComment={createComment}
+      reportMessage={reportMessage}
+      deleteMessage={deleteMessage}
+    />
+  ) : (
+    "Pas de messages!"
+  );
+MessagesRoute.propTypes = {
+  allEvents: PropTypes.arrayOf(PropTypes.object),
+  loadMorePastEvents: PropTypes.func,
+  messages: PropTypes.arrayOf(PropTypes.object),
+  isLoadingMessages: PropTypes.bool,
+  loadMoreMessages: PropTypes.func,
+  createMessage: PropTypes.func,
+  updateMessage: PropTypes.func,
+  createComment: PropTypes.func,
+  reportMessage: PropTypes.func,
+  deleteMessage: PropTypes.func,
+  user: PropTypes.object,
+};
+const AgendaRoute = ({
+  group,
+  allEvents,
+  upcomingEvents,
+  pastEvents,
+  loadMorePastEvents,
+  isLoadingPastEvents,
+  hasTabs,
+}) =>
+  allEvents.length > 0 ? (
+    <>
+      <GroupEventList title="Événements à venir" events={upcomingEvents} />
+      <GroupEventList
+        title="Événements passés"
+        events={pastEvents}
+        loadMore={loadMorePastEvents}
+        isLoading={isLoadingPastEvents}
+      />
+      <GroupLocation {...group} />
+      <ShareCard title="Partager le lien du groupe" />
+    </>
+  ) : (
+    <>
+      {hasTabs ? "Pas d'événements" : null}
+      <GroupDescription {...group} maxHeight="auto" />
+      <ShareCard title="Inviter vos ami·es à rejoindre le groupe" />
+      <GroupLocation {...group} />
+    </>
+  );
+AgendaRoute.propTypes = {
+  group: PropTypes.object,
+  allEvents: PropTypes.arrayOf(PropTypes.object),
+  upcomingEvents: PropTypes.arrayOf(PropTypes.object),
+  pastEvents: PropTypes.arrayOf(PropTypes.object),
+  isLoadingPastEvents: PropTypes.bool,
+  loadMorePastEvents: PropTypes.func,
+  hasTabs: PropTypes.bool,
+};
+const ReportsRoute = ({ pastEventReports }) =>
+  Array.isArray(pastEventReports) && pastEventReports.length > 0 ? (
+    <GroupEventList title="Comptes-rendus" events={pastEventReports} />
+  ) : (
+    "Pas de comptes-rendus"
+  );
+ReportsRoute.propTypes = {
+  pastEventReports: PropTypes.arrayOf(PropTypes.object),
+};
+
+const Routes = {
+  messages: React.memo(MessagesRoute),
+  agenda: React.memo(AgendaRoute),
+  reports: React.memo(ReportsRoute),
+};
+
 const DesktopGroupPage = (props) => {
   const {
     backLink,
@@ -129,29 +187,14 @@ const DesktopGroupPage = (props) => {
     groupSuggestions,
     upcomingEvents,
     pastEvents,
-    isLoadingPastEvents,
-    loadMorePastEvents,
-    pastEventReports,
-    messages,
-    loadMoreMessages,
-    createMessage,
-    updateMessage,
-    createComment,
-    reportMessage,
-    deleteMessage,
-    isLoadingMessages,
-    user,
   } = props;
 
-  const { tabs, activeTab, activeTabIndex } = useTabs(props, false);
+  const { hasTabs, tabs, activeTabIndex } = useTabs(props, false);
 
-  const hasEvents = useMemo(() => {
-    const past = Array.isArray(pastEvents) ? pastEvents : [];
-    const upcoming = Array.isArray(upcomingEvents) ? upcomingEvents : [];
-    return past.length + upcoming.length > 0;
-  }, [upcomingEvents, pastEvents]);
-
-  const hasTabs = tabs.length > 1;
+  const allEvents = useMemo(
+    () => [...(upcomingEvents || []), ...(pastEvents || [])],
+    [upcomingEvents, pastEvents]
+  );
 
   if (!group) {
     return null;
@@ -184,20 +227,8 @@ const DesktopGroupPage = (props) => {
           <GroupBanner {...group} />
         </Column>
       </Row>
-      {hasTabs ? (
-        <StyledMenu>
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              data-active={tab.isActive}
-              disabled={tab.isActive}
-              onClick={tab.goToTab}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </StyledMenu>
-      ) : null}
+
+      <GroupPageMenu tabs={tabs} hasTabs={hasTabs} stickyOffset={72} />
 
       <Row
         gutter={32}
@@ -206,56 +237,28 @@ const DesktopGroupPage = (props) => {
           flexDirection: activeTabIndex === 0 ? "row" : "row-reverse",
         }}
       >
-        {activeTab.id === "messages" && Array.isArray(messages) ? (
-          <Column grow>
-            <GroupMessages
-              user={user}
-              events={[...(upcomingEvents || []), ...(pastEvents || [])]}
-              messages={messages}
-              isLoading={isLoadingMessages}
-              loadMoreMessages={loadMoreMessages}
-              loadMoreEvents={loadMorePastEvents}
-              createMessage={createMessage}
-              updateMessage={updateMessage}
-              createComment={createComment}
-              reportMessage={reportMessage}
-              deleteMessage={deleteMessage}
-            />
-          </Column>
-        ) : null}
-        {activeTab.id === "agenda" && hasEvents ? (
-          <Column grow>
-            <GroupEventList
-              title="Événements à venir"
-              events={upcomingEvents}
-            />
-            <GroupEventList
-              title="Événements passés"
-              events={pastEvents}
-              loadMore={loadMorePastEvents}
-              isLoading={isLoadingPastEvents}
-            />
-            <GroupLocation {...group} />
-            <ShareCard title="Partager le lien du groupe" />
-          </Column>
-        ) : null}
-        {activeTab.id === "reports" && hasEvents ? (
-          <Column grow>
-            <GroupEventList title="Comptes-rendus" events={pastEventReports} />
-          </Column>
-        ) : null}
-        {!hasEvents ? (
-          <Column grow>
-            <GroupDescription {...group} maxHeight="auto" />
-            <ShareCard title="Inviter vos ami·es à rejoindre le groupe" />
-            <GroupLocation {...group} />
-          </Column>
-        ) : null}
+        <Switch>
+          {tabs.map((tab) => {
+            const R = Routes[tab.id];
+            return (
+              <Route key={tab.id} path={tab.pathname}>
+                <Column grow>
+                  <R
+                    {...props}
+                    allEvents={allEvents}
+                    hasTabs={hasTabs}
+                    messageURLBase={messageURLBase}
+                  />
+                </Column>
+              </Route>
+            );
+          })}
+        </Switch>
 
         <Column width="460px">
           <GroupUserActions {...group} />
           <GroupContactCard {...group} />
-          {hasEvents && <GroupDescription {...group} />}
+          {allEvents.length > 0 ? <GroupDescription {...group} /> : null}
           <GroupLinks {...group} />
           <GroupFacts {...group} />
           {group.routes && group.routes.donations && (
@@ -276,7 +279,6 @@ const DesktopGroupPage = (props) => {
 };
 DesktopGroupPage.propTypes = {
   backLink: PropTypes.object,
-  isConnected: PropTypes.bool,
   group: PropTypes.shape({
     isMember: PropTypes.bool,
     isManager: PropTypes.bool,
@@ -287,19 +289,6 @@ DesktopGroupPage.propTypes = {
   groupSuggestions: PropTypes.arrayOf(PropTypes.object),
   upcomingEvents: PropTypes.arrayOf(PropTypes.object),
   pastEvents: PropTypes.arrayOf(PropTypes.object),
-  isLoadingPastEvents: PropTypes.bool,
-  loadMorePastEvents: PropTypes.func,
-  pastEventReports: PropTypes.arrayOf(PropTypes.object),
-  messages: PropTypes.arrayOf(PropTypes.object),
-  isLoadingMessages: PropTypes.bool,
-  loadMoreMessages: PropTypes.func,
-  createMessage: PropTypes.func,
-  updateMessage: PropTypes.func,
-  createComment: PropTypes.func,
-  reportMessage: PropTypes.func,
-  deleteMessage: PropTypes.func,
-  user: PropTypes.object,
-  tabs: PropTypes.arrayOf(PropTypes.object),
-  activeTab: PropTypes.string,
 };
+
 export default DesktopGroupPage;

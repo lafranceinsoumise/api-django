@@ -77,9 +77,7 @@ const GroupMessages = (props) => {
             onComment={createComment}
             onReport={reportMessage}
             onDelete={deleteMessage}
-            messageURL={
-              messageURLBase ? messageURLBase.replace(":id", message.id) : ""
-            }
+            messageURL={messageURLBase ? messageURLBase + message.id + "/" : ""}
             withMobileCommentField
           />
         )}

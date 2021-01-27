@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useMemo } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import useSWR, { useSWRInfinite } from "swr";
 
+import { RouteConfig } from "@agir/front/app/routes.config";
 import logger from "@agir/lib/utils/logger";
 
-import GROUP_PAGE_TABS from "./tabs.config.js";
+import GROUP_PAGE_ROUTES from "./routes.config.js";
 
 import MESSAGES from "./messages.json";
 
 const log = logger(__filename);
 
-export const useGroupDetail = (groupPk) => {
+export const useGroupDetail = (groupPk, messagePk) => {
   const { data: group } = useSWR(`/api/groupes/${groupPk}`);
   log.debug("Group data", group);
 
@@ -60,6 +61,8 @@ export const useGroupDetail = (groupPk) => {
   log.debug("Group past event reports", pastEventReports);
 
   const messages = MESSAGES;
+  const message = messagePk ? MESSAGES[0] : null;
+
   const loadMoreMessages = console.log;
   const createMessage = console.log;
   const updateMessage = console.log;
@@ -69,7 +72,7 @@ export const useGroupDetail = (groupPk) => {
   const isLoadingMessages = false;
 
   return {
-    group,
+    group: group,
     groupSuggestions,
     upcomingEvents,
     pastEvents,
@@ -79,6 +82,7 @@ export const useGroupDetail = (groupPk) => {
     isLoadingPastEvents,
     pastEventReports,
     messages,
+    message,
     loadMoreMessages,
     createMessage,
     updateMessage,
@@ -90,63 +94,67 @@ export const useGroupDetail = (groupPk) => {
 };
 
 export const useTabs = (props, isMobile = true) => {
-  const { activeTab } = props;
   const history = useHistory();
-
-  const tabs = useMemo(
+  const location = useLocation();
+  const routes = useMemo(
     () =>
-      GROUP_PAGE_TABS.filter((tab) =>
-        typeof tab.isActive === "function"
-          ? tab.isActive(props, isMobile)
-          : tab.isActive
-      ).map((tab) => ({
-        ...tab,
-        to: `/groupes/${props.group.id}/${tab.slug}/`,
-        goToTab: () => {
-          history.push(`/groupes/${props.group.id}/${tab.slug}/`);
-        },
-      })),
-    [history, props, isMobile]
+      GROUP_PAGE_ROUTES.filter((route) =>
+        typeof route.hasRoute === "function"
+          ? route.hasRoute(props, isMobile)
+          : route.hasRoute
+      ).map(
+        (route) =>
+          new RouteConfig({
+            ...route,
+            pathname: `/groupes/${props.group.id}${route.pathname}`,
+          })
+      ),
+    [props, isMobile]
   );
 
-  const { active, activeIndex } = useMemo(() => {
-    const result = { active: tabs[0], activeIndex: 0 };
-    tabs.forEach((tab, i) => {
-      if (tab.slug === activeTab) {
-        result.active = tab;
-        result.activeIndex = i;
+  const { activeTab, activeTabIndex, shouldRedirect } = useMemo(() => {
+    const result = {
+      activeTab: routes[0],
+      activeTabIndex: 0,
+      shouldRedirect: true,
+    };
+    routes.forEach((route, i) => {
+      if (route.match(location.pathname)) {
+        result.activeTab = route;
+        result.activeTabIndex = i;
+        result.shouldRedirect = false;
       }
     });
     return result;
-  }, [tabs, activeTab]);
+  }, [routes, location.pathname]);
 
-  const handleTabChange = useCallback((tab) => {
-    tab.goToTab();
-  }, []);
+  const handleTabChange = useCallback(
+    (route) => {
+      route && route.getLink && history.push(route.getLink());
+    },
+    [history]
+  );
 
   const handleNextTab = useCallback(() => {
-    const nextIndex = Math.min(activeIndex + 1, tabs.length - 1);
-    tabs[nextIndex].goToTab();
-  }, [activeIndex, tabs]);
+    const nextIndex = Math.min(activeTabIndex + 1, routes.length - 1);
+    handleTabChange(routes[nextIndex]);
+  }, [handleTabChange, activeTabIndex, routes]);
 
   const handlePrevTab = useCallback(() => {
-    const prevIndex = Math.max(0, activeIndex - 1);
-    tabs[prevIndex].goToTab();
-  }, [activeIndex, tabs]);
+    const prevIndex = Math.max(0, activeTabIndex - 1);
+    handleTabChange(routes[prevIndex]);
+  }, [handleTabChange, activeTabIndex, routes]);
 
   useEffect(() => {
-    activeTab !== active.id && history.push(active.to);
-  }, [history, activeTab, active.id, active.to]);
+    shouldRedirect && handleTabChange(activeTab);
+  }, [shouldRedirect, handleTabChange, activeTab]);
 
   return {
-    tabs: tabs.map((tab) => ({
-      ...tab,
-      isActive: active.id === tab.id || undefined,
-    })),
+    tabs: routes,
+    activeTabIndex,
+    hasTabs: routes.length > 1,
     onTabChange: handleTabChange,
     onNextTab: handleNextTab,
     onPrevTab: handlePrevTab,
-    activeTab: active,
-    activeTabIndex: activeIndex,
   };
 };

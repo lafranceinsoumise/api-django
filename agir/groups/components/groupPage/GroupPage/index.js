@@ -21,7 +21,9 @@ import {
 import { useGroupDetail } from "./hooks";
 
 const GroupPage = (props) => {
-  const { groupPk, activeTab } = props;
+  const { groupPk, messagePk } = props;
+
+  console.log(messagePk);
 
   const isSessionLoaded = useSelector(getIsSessionLoaded);
   const isConnected = useSelector(getIsConnected);
@@ -45,7 +47,7 @@ const GroupPage = (props) => {
     createComment,
     reportMessage,
     deleteMessage,
-  } = useGroupDetail(groupPk);
+  } = useGroupDetail(groupPk, messagePk);
 
   const { is2022, isManager, routes } = group || {};
 
@@ -84,13 +86,12 @@ const GroupPage = (props) => {
       reportMessage={reportMessage}
       deleteMessage={deleteMessage}
       groupSuggestions={Array.isArray(groupSuggestions) ? groupSuggestions : []}
-      activeTab={activeTab}
       user={user}
     />
   );
 };
 GroupPage.propTypes = {
   groupPk: PropTypes.string,
-  activeTab: PropTypes.string,
+  messagePk: PropTypes.string,
 };
 export default GroupPage;

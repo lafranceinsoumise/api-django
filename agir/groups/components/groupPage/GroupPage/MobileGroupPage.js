@@ -1,5 +1,8 @@
 import PropTypes from "prop-types";
-import React from "react";
+import React, { useMemo } from "react";
+import { Switch, Route } from "react-router-dom";
+import { useSpring, animated } from "react-spring";
+import { useDrag } from "react-use-gesture";
 import styled from "styled-components";
 
 import style from "@agir/front/genericComponents/_variables.scss";
@@ -8,7 +11,6 @@ import { useTabs } from "./hooks";
 
 import { Column, Container, Row } from "@agir/front/genericComponents/grid";
 import Skeleton from "@agir/front/genericComponents/Skeleton";
-import Tabs from "@agir/front/genericComponents/Tabs";
 import ShareCard from "@agir/front/genericComponents/ShareCard";
 
 import GroupBanner from "../GroupBanner";
@@ -23,6 +25,7 @@ import GroupDonation from "../GroupDonation";
 import GroupSuggestions from "../GroupSuggestions";
 import GroupEventList from "../GroupEventList";
 import GroupMessages from "../GroupMessages";
+import GroupPageMenu from "../GroupPageMenu";
 
 export const MobileGroupPageSkeleton = () => (
   <Container style={{ margin: "2rem auto", padding: "0 1rem" }}>
@@ -34,7 +37,7 @@ export const MobileGroupPageSkeleton = () => (
   </Container>
 );
 
-const Tab = styled.div`
+const StyledTab = styled(animated.div)`
   max-width: 100%;
   margin: 0;
   padding: 0;
@@ -52,27 +55,214 @@ const Agenda = styled.div`
   }
 `;
 
-const MobileGroupPage = (props) => {
-  const {
-    group,
-    groupSuggestions,
-    upcomingEvents,
-    pastEvents,
-    isLoadingPastEvents,
-    loadMorePastEvents,
-    pastEventReports,
-    messages,
-    loadMoreMessages,
-    createMessage,
-    updateMessage,
-    createComment,
-    reportMessage,
-    deleteMessage,
-    isLoadingMessages,
-    user,
-  } = props;
+const Tab = (props) => {
+  const { onNextTab, onPrevTab, children } = props;
+  const [{ xy }, set] = useSpring(() => ({ xy: [0, 0] }));
+  const bind = useDrag(
+    ({ args: [limit], down, movement: [x] }) => {
+      if (down) {
+        const newX =
+          x > 0 ? Math.min(Math.abs(limit), x) : Math.max(-Math.abs(limit), x);
+        set({ xy: [newX, 0] });
+        return;
+      }
+      set({ xy: [0, 0] });
+      if (Math.abs(x) > Math.abs(limit)) {
+        x <= 0 ? onNextTab && onNextTab() : onPrevTab && onPrevTab();
+      }
+    },
+    { axis: "x", lockDirection: true }
+  );
 
-  const tabProps = useTabs(props, true);
+  return (
+    <StyledTab
+      {...bind(50)}
+      style={{
+        transform: xy && xy.interpolate((x) => `translate3d(${x}px, 0px, 0)`),
+      }}
+    >
+      {children}
+    </StyledTab>
+  );
+};
+Tab.propTypes = {
+  onNextTab: PropTypes.func,
+  onPrevTab: PropTypes.func,
+  children: PropTypes.node,
+};
+
+const MessagesRoute = ({
+  messageURLBase,
+  messages,
+  user,
+  allEvents,
+  isLoadingMessages,
+  loadMoreMessages,
+  loadMorePastEvents,
+  createMessage,
+  updateMessage,
+  createComment,
+  reportMessage,
+  deleteMessage,
+}) => (
+  <>
+    {Array.isArray(messages) && messages.length > 0 ? (
+      <GroupMessages
+        messageURLBase={messageURLBase}
+        user={user}
+        events={allEvents}
+        messages={messages}
+        isLoading={isLoadingMessages}
+        loadMoreMessages={loadMoreMessages}
+        loadMoreEvents={loadMorePastEvents}
+        createMessage={createMessage}
+        updateMessage={updateMessage}
+        createComment={createComment}
+        reportMessage={reportMessage}
+        deleteMessage={deleteMessage}
+      />
+    ) : (
+      "Pas de messages!"
+    )}
+  </>
+);
+MessagesRoute.propTypes = {
+  messageURLBase: PropTypes.string,
+  allEvents: PropTypes.arrayOf(PropTypes.object),
+  loadMorePastEvents: PropTypes.func,
+  messages: PropTypes.arrayOf(PropTypes.object),
+  isLoadingMessages: PropTypes.bool,
+  loadMoreMessages: PropTypes.func,
+  createMessage: PropTypes.func,
+  updateMessage: PropTypes.func,
+  createComment: PropTypes.func,
+  reportMessage: PropTypes.func,
+  deleteMessage: PropTypes.func,
+  user: PropTypes.object,
+};
+const AgendaRoute = ({
+  allEvents,
+  upcomingEvents,
+  pastEvents,
+  loadMorePastEvents,
+  isLoadingPastEvents,
+  hasTabs,
+}) => (
+  <>
+    {Array.isArray(upcomingEvents) && upcomingEvents.length > 0 ? (
+      <GroupEventList title="Événements à venir" events={upcomingEvents} />
+    ) : null}
+    {Array.isArray(pastEvents) && pastEvents.length > 0 ? (
+      <GroupEventList
+        title="Événements passés"
+        events={pastEvents}
+        loadMore={loadMorePastEvents}
+        isLoading={isLoadingPastEvents}
+      />
+    ) : null}
+    {allEvents.length === 0 && hasTabs ? "Pas d'événements" : null}
+  </>
+);
+AgendaRoute.propTypes = {
+  allEvents: PropTypes.arrayOf(PropTypes.object),
+  upcomingEvents: PropTypes.arrayOf(PropTypes.object),
+  pastEvents: PropTypes.arrayOf(PropTypes.object),
+  isLoadingPastEvents: PropTypes.bool,
+  loadMorePastEvents: PropTypes.func,
+  hasTabs: PropTypes.bool,
+};
+const ReportsRoute = ({ pastEventReports }) => (
+  <>
+    {Array.isArray(pastEventReports) && pastEventReports.length > 0 ? (
+      <GroupEventList title="Comptes-rendus" events={pastEventReports} />
+    ) : (
+      "Pas de comptes-rendus"
+    )}
+  </>
+);
+ReportsRoute.propTypes = {
+  pastEventReports: PropTypes.arrayOf(PropTypes.object),
+};
+const InfoRoute = ({
+  upcomingEvents,
+  goToAgendaTab,
+  group,
+  groupSuggestions,
+}) => (
+  <>
+    {Array.isArray(upcomingEvents) && upcomingEvents.length > 0 ? (
+      <Agenda>
+        <h3>Agenda</h3>
+        <GroupEventList
+          events={[upcomingEvents[0]]}
+          loadMore={goToAgendaTab}
+          loadMoreLabel="Voir tout l'agenda"
+        />
+      </Agenda>
+    ) : null}
+
+    <GroupContactCard {...group} />
+    <GroupDescription {...group} />
+    <GroupLinks {...group} />
+    <GroupFacts {...group} />
+    <GroupLocation {...group} />
+    {group.routes && group.routes.donations && (
+      <GroupDonation url={group.routes.donations} />
+    )}
+    <ShareCard title="Partager le lien du groupe" />
+
+    {Array.isArray(groupSuggestions) && groupSuggestions.length > 0 ? (
+      <div style={{ marginTop: 71, marginBottom: 71 }}>
+        <GroupSuggestions groups={groupSuggestions} />
+      </div>
+    ) : null}
+  </>
+);
+InfoRoute.propTypes = {
+  group: PropTypes.shape({
+    isMember: PropTypes.bool,
+    isManager: PropTypes.bool,
+    routes: PropTypes.shape({
+      donations: PropTypes.string,
+    }),
+  }),
+  upcomingEvents: PropTypes.arrayOf(PropTypes.object),
+  groupSuggestions: PropTypes.arrayOf(PropTypes.object),
+  goToAgendaTab: PropTypes.func,
+};
+
+const Routes = {
+  messages: React.memo(MessagesRoute),
+  agenda: React.memo(AgendaRoute),
+  reports: React.memo(ReportsRoute),
+  info: React.memo(InfoRoute),
+};
+
+const MobileGroupPage = (props) => {
+  const { group, upcomingEvents, pastEvents } = props;
+  const { hasTabs, tabs, onTabChange, onNextTab, onPrevTab } = useTabs(
+    props,
+    true
+  );
+
+  const goToAgendaTab = useMemo(() => {
+    const agendaTab = tabs.find((tab) => tab.id === "agenda");
+    if (agendaTab && onTabChange) {
+      return () => onTabChange(agendaTab);
+    }
+  }, [tabs, onTabChange]);
+
+  const allEvents = useMemo(
+    () => [...(upcomingEvents || []), ...(pastEvents || [])],
+    [upcomingEvents, pastEvents]
+  );
+
+  const messageURLBase = useMemo(() => {
+    const messagesTab = tabs.find((tab) => tab.id === "messages");
+    if (messagesTab) {
+      return messagesTab.getLink();
+    }
+  }, [tabs]);
 
   if (!group) {
     return null;
@@ -87,116 +277,31 @@ const MobileGroupPage = (props) => {
     >
       <GroupBanner {...group} />
       <GroupUserActions {...group} />
-      <Tabs {...tabProps} stickyOffset={72}>
-        {tabProps &&
-          tabProps.tabs.map((tab) => {
-            switch (tab.id) {
-              case "messages":
-                return (
-                  <Tab key={tab.id}>
-                    <GroupMessages
-                      user={user}
-                      events={[
-                        ...(upcomingEvents || []),
-                        ...(pastEvents || []),
-                      ]}
-                      messages={messages}
-                      isLoading={isLoadingMessages}
-                      loadMoreMessages={loadMoreMessages}
-                      loadMoreEvents={loadMorePastEvents}
-                      createMessage={createMessage}
-                      updateMessage={updateMessage}
-                      createComment={createComment}
-                      reportMessage={reportMessage}
-                      deleteMessage={deleteMessage}
-                    />
-                  </Tab>
-                );
-              case "agenda":
-                return (
-                  <Tab key={tab.id}>
-                    <GroupEventList
-                      title="Événements à venir"
-                      events={upcomingEvents}
-                    />
-                    <GroupEventList
-                      title="Événements passés"
-                      events={pastEvents}
-                      loadMore={loadMorePastEvents}
-                      isLoading={isLoadingPastEvents}
-                    />
-                  </Tab>
-                );
-              case "reports":
-                return (
-                  <Tab key={tab.id}>
-                    <GroupEventList
-                      title="Comptes-rendus"
-                      events={pastEventReports}
-                    />
-                  </Tab>
-                );
-              case "info":
-                return (
-                  <Tab key={tab.id}>
-                    {Array.isArray(upcomingEvents) &&
-                    upcomingEvents.length > 0 ? (
-                      <Agenda>
-                        <h3>Agenda</h3>
-                        <GroupEventList
-                          events={[upcomingEvents[0]]}
-                          loadMore={tabProps.onNextTab}
-                          loadMoreLabel="Voir tout l'agenda"
-                        />
-                      </Agenda>
-                    ) : null}
-
-                    <GroupContactCard {...group} />
-                    <GroupDescription {...group} />
-                    <GroupLinks {...group} />
-                    <GroupFacts {...group} />
-                    <GroupLocation {...group} />
-                    {group.routes && group.routes.donations && (
-                      <GroupDonation url={group.routes.donations} />
-                    )}
-                    <ShareCard title="Partager le lien du groupe" />
-
-                    {Array.isArray(groupSuggestions) &&
-                    groupSuggestions.length > 0 ? (
-                      <div style={{ marginTop: 71, marginBottom: 71 }}>
-                        <GroupSuggestions groups={groupSuggestions} />
-                      </div>
-                    ) : null}
-                  </Tab>
-                );
-            }
-          })}
-      </Tabs>
+      <GroupPageMenu tabs={tabs} hasTabs={hasTabs} stickyOffset={72} />
+      <Switch>
+        {tabs.map((tab) => {
+          const R = Routes[tab.id];
+          return (
+            <Route key={tab.id} path={tab.pathname}>
+              <Tab onNextTab={onNextTab} onPrevTab={onPrevTab}>
+                <R
+                  {...props}
+                  allEvents={allEvents}
+                  hasTabs={hasTabs}
+                  goToAgendaTab={goToAgendaTab}
+                  messageURLBase={messageURLBase}
+                />
+              </Tab>
+            </Route>
+          );
+        })}
+      </Switch>
     </Container>
   );
 };
 MobileGroupPage.propTypes = {
-  group: PropTypes.shape({
-    isMember: PropTypes.bool,
-    isManager: PropTypes.bool,
-    routes: PropTypes.shape({
-      donations: PropTypes.string,
-    }),
-  }),
-  groupSuggestions: PropTypes.arrayOf(PropTypes.object),
+  group: PropTypes.object,
   upcomingEvents: PropTypes.arrayOf(PropTypes.object),
   pastEvents: PropTypes.arrayOf(PropTypes.object),
-  isLoadingPastEvents: PropTypes.bool,
-  loadMorePastEvents: PropTypes.func,
-  pastEventReports: PropTypes.arrayOf(PropTypes.object),
-  messages: PropTypes.arrayOf(PropTypes.object),
-  isLoadingMessages: PropTypes.bool,
-  loadMoreMessages: PropTypes.func,
-  createMessage: PropTypes.func,
-  updateMessage: PropTypes.func,
-  createComment: PropTypes.func,
-  reportMessage: PropTypes.func,
-  deleteMessage: PropTypes.func,
-  user: PropTypes.object,
 };
 export default MobileGroupPage;

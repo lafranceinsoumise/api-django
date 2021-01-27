@@ -37,7 +37,12 @@ const Page = (props) => {
     return (
       <ErrorBoundary>
         <Suspense fallback={<div />}>
-          <Component {...routeParams} {...rest} data={[]} />
+          <Component
+            {...(routeConfig.routeProps || {})}
+            {...routeParams}
+            {...rest}
+            data={[]}
+          />
         </Suspense>
       </ErrorBoundary>
     );
@@ -47,7 +52,12 @@ const Page = (props) => {
     <Layout {...(routeConfig.layoutProps || {})} active={routeConfig.id}>
       <ErrorBoundary>
         <Suspense fallback={<div />}>
-          <Component {...routeParams} {...rest} data={[]} />
+          <Component
+            {...(routeConfig.routeProps || {})}
+            {...routeParams}
+            {...rest}
+            data={[]}
+          />
         </Suspense>
       </ErrorBoundary>
     </Layout>
