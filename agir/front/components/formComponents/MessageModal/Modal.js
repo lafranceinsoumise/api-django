@@ -85,9 +85,12 @@ const StyledModalContent = styled.div`
   @media (max-width: ${style.collapse}px) {
     border-radius: 0;
     max-width: 100%;
-    min-height: 100vh;
+    height: 100vh;
     margin: 0;
+    display: flex;
+    flex-flow: column nowrap;
   }
+
   ${StyledModalHeader} {
     border-bottom: ${({ $isLoading }) =>
       $isLoading
@@ -99,6 +102,11 @@ const StyledModalContent = styled.div`
   ${StyledModalFooter} {
     opacity: ${({ $isLoading }) => ($isLoading ? ".3" : "1")};
     transition: opacity 250ms ease-in-out;
+  }
+  ${StyledModalBody} {
+    @media (max-width: ${style.collapse}px) {
+      flex: 1 1 auto;
+    }
   }
 `;
 

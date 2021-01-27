@@ -102,6 +102,10 @@ const StyledWrapper = styled.div`
   overflow-y: auto;
   padding-top: 1.5rem;
 
+  @media (max-width: ${style.collapse}px) {
+    max-height: 100%;
+  }
+
   & > *:last-child {
     margin-bottom: 1.5rem;
   }

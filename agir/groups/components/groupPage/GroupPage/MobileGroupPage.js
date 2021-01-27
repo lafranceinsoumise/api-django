@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useMemo } from "react";
+import React from "react";
 import styled from "styled-components";
 
 import style from "@agir/front/genericComponents/_variables.scss";
@@ -22,6 +22,7 @@ import GroupFacts from "../GroupFacts";
 import GroupDonation from "../GroupDonation";
 import GroupSuggestions from "../GroupSuggestions";
 import GroupEventList from "../GroupEventList";
+import GroupMessages from "../GroupMessages";
 
 export const MobileGroupPageSkeleton = () => (
   <Container style={{ margin: "2rem auto", padding: "0 1rem" }}>
@@ -60,6 +61,15 @@ const MobileGroupPage = (props) => {
     isLoadingPastEvents,
     loadMorePastEvents,
     pastEventReports,
+    messages,
+    loadMoreMessages,
+    createMessage,
+    updateMessage,
+    createComment,
+    reportMessage,
+    deleteMessage,
+    isLoadingMessages,
+    user,
   } = props;
 
   const tabProps = useTabs(props, true);
@@ -78,46 +88,89 @@ const MobileGroupPage = (props) => {
       <GroupBanner {...group} />
       <GroupUserActions {...group} />
       <Tabs {...tabProps} stickyOffset={72}>
-        <Tab>
-          {Array.isArray(upcomingEvents) && upcomingEvents.length > 0 ? (
-            <Agenda>
-              <h3>Agenda</h3>
-              <GroupEventList
-                events={[upcomingEvents[0]]}
-                loadMore={tabProps.onNextTab}
-                loadMoreLabel="Voir tout l'agenda"
-              />
-            </Agenda>
-          ) : null}
+        {tabProps &&
+          tabProps.tabs.map((tab) => {
+            switch (tab.id) {
+              case "messages":
+                return (
+                  <Tab key={tab.id}>
+                    <GroupMessages
+                      user={user}
+                      events={[
+                        ...(upcomingEvents || []),
+                        ...(pastEvents || []),
+                      ]}
+                      messages={messages}
+                      isLoading={isLoadingMessages}
+                      loadMoreMessages={loadMoreMessages}
+                      loadMoreEvents={loadMorePastEvents}
+                      createMessage={createMessage}
+                      updateMessage={updateMessage}
+                      createComment={createComment}
+                      reportMessage={reportMessage}
+                      deleteMessage={deleteMessage}
+                    />
+                  </Tab>
+                );
+              case "agenda":
+                return (
+                  <Tab key={tab.id}>
+                    <GroupEventList
+                      title="Événements à venir"
+                      events={upcomingEvents}
+                    />
+                    <GroupEventList
+                      title="Événements passés"
+                      events={pastEvents}
+                      loadMore={loadMorePastEvents}
+                      isLoading={isLoadingPastEvents}
+                    />
+                  </Tab>
+                );
+              case "reports":
+                return (
+                  <Tab key={tab.id}>
+                    <GroupEventList
+                      title="Comptes-rendus"
+                      events={pastEventReports}
+                    />
+                  </Tab>
+                );
+              case "info":
+                return (
+                  <Tab key={tab.id}>
+                    {Array.isArray(upcomingEvents) &&
+                    upcomingEvents.length > 0 ? (
+                      <Agenda>
+                        <h3>Agenda</h3>
+                        <GroupEventList
+                          events={[upcomingEvents[0]]}
+                          loadMore={tabProps.onNextTab}
+                          loadMoreLabel="Voir tout l'agenda"
+                        />
+                      </Agenda>
+                    ) : null}
 
-          <GroupContactCard {...group} />
-          <GroupDescription {...group} />
-          <GroupLinks {...group} />
-          <GroupFacts {...group} />
-          <GroupLocation {...group} />
-          {group.routes && group.routes.donations && (
-            <GroupDonation url={group.routes.donations} />
-          )}
-          <ShareCard title="Partager le lien du groupe" />
+                    <GroupContactCard {...group} />
+                    <GroupDescription {...group} />
+                    <GroupLinks {...group} />
+                    <GroupFacts {...group} />
+                    <GroupLocation {...group} />
+                    {group.routes && group.routes.donations && (
+                      <GroupDonation url={group.routes.donations} />
+                    )}
+                    <ShareCard title="Partager le lien du groupe" />
 
-          {Array.isArray(groupSuggestions) && groupSuggestions.length > 0 ? (
-            <div style={{ marginTop: 71, marginBottom: 71 }}>
-              <GroupSuggestions groups={groupSuggestions} />
-            </div>
-          ) : null}
-        </Tab>
-        <Tab>
-          <GroupEventList title="Événements à venir" events={upcomingEvents} />
-          <GroupEventList
-            title="Événements passés"
-            events={pastEvents}
-            loadMore={loadMorePastEvents}
-            isLoading={isLoadingPastEvents}
-          />
-        </Tab>
-        <Tab>
-          <GroupEventList title="Comptes-rendus" events={pastEventReports} />
-        </Tab>
+                    {Array.isArray(groupSuggestions) &&
+                    groupSuggestions.length > 0 ? (
+                      <div style={{ marginTop: 71, marginBottom: 71 }}>
+                        <GroupSuggestions groups={groupSuggestions} />
+                      </div>
+                    ) : null}
+                  </Tab>
+                );
+            }
+          })}
       </Tabs>
     </Container>
   );
@@ -136,6 +189,14 @@ MobileGroupPage.propTypes = {
   isLoadingPastEvents: PropTypes.bool,
   loadMorePastEvents: PropTypes.func,
   pastEventReports: PropTypes.arrayOf(PropTypes.object),
-  tabs: PropTypes.arrayOf(PropTypes.object),
+  messages: PropTypes.arrayOf(PropTypes.object),
+  isLoadingMessages: PropTypes.bool,
+  loadMoreMessages: PropTypes.func,
+  createMessage: PropTypes.func,
+  updateMessage: PropTypes.func,
+  createComment: PropTypes.func,
+  reportMessage: PropTypes.func,
+  deleteMessage: PropTypes.func,
+  user: PropTypes.object,
 };
 export default MobileGroupPage;

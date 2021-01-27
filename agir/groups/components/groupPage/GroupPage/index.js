@@ -15,6 +15,7 @@ import {
   getIsSessionLoaded,
   getIsConnected,
   getBackLink,
+  getUser,
 } from "@agir/front/globalContext/reducers";
 
 import { useGroupDetail } from "./hooks";
@@ -25,6 +26,7 @@ const GroupPage = (props) => {
   const isSessionLoaded = useSelector(getIsSessionLoaded);
   const isConnected = useSelector(getIsConnected);
   const backLink = useSelector(getBackLink);
+  const user = useSelector(getUser);
   const dispatch = useDispatch();
 
   const {
@@ -35,6 +37,14 @@ const GroupPage = (props) => {
     loadMorePastEvents,
     isLoadingPastEvents,
     pastEventReports,
+    messages,
+    loadMoreMessages,
+    isLoadingMessages,
+    createMessage,
+    updateMessage,
+    createComment,
+    reportMessage,
+    deleteMessage,
   } = useGroupDetail(groupPk);
 
   const { is2022, isManager, routes } = group || {};
@@ -65,8 +75,17 @@ const GroupPage = (props) => {
       isLoadingPastEvents={isLoadingPastEvents}
       loadMorePastEvents={loadMorePastEvents}
       pastEventReports={pastEventReports}
+      messages={messages}
+      isLoadingMessages={isLoadingMessages}
+      loadMoreMessages={loadMoreMessages}
+      createMessage={createMessage}
+      updateMessage={updateMessage}
+      createComment={createComment}
+      reportMessage={reportMessage}
+      deleteMessage={deleteMessage}
       groupSuggestions={Array.isArray(groupSuggestions) ? groupSuggestions : []}
       activeTab={activeTab}
+      user={user}
     />
   );
 };

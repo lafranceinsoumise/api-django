@@ -22,6 +22,7 @@ import GroupFacts from "../GroupFacts";
 import GroupDonation from "../GroupDonation";
 import GroupSuggestions from "../GroupSuggestions";
 import GroupEventList from "../GroupEventList";
+import GroupMessages from "../GroupMessages";
 
 const IndexLinkAnchor = styled(Link)`
   font-weight: 600;
@@ -131,6 +132,15 @@ const DesktopGroupPage = (props) => {
     isLoadingPastEvents,
     loadMorePastEvents,
     pastEventReports,
+    messages,
+    loadMoreMessages,
+    createMessage,
+    updateMessage,
+    createComment,
+    reportMessage,
+    deleteMessage,
+    isLoadingMessages,
+    user,
   } = props;
 
   const { tabs, activeTab, activeTabIndex } = useTabs(props, false);
@@ -196,40 +206,51 @@ const DesktopGroupPage = (props) => {
           flexDirection: activeTabIndex === 0 ? "row" : "row-reverse",
         }}
       >
-        {hasEvents ? (
-          <>
-            {activeTab.id === "agenda" ? (
-              <Column grow>
-                <GroupEventList
-                  title="Événements à venir"
-                  events={upcomingEvents}
-                />
-                <GroupEventList
-                  title="Événements passés"
-                  events={pastEvents}
-                  loadMore={loadMorePastEvents}
-                  isLoading={isLoadingPastEvents}
-                />
-                <GroupLocation {...group} />
-                <ShareCard title="Partager le lien du groupe" />
-              </Column>
-            ) : null}
-            {activeTab.id === "reports" ? (
-              <Column grow>
-                <GroupEventList
-                  title="Comptes-rendus"
-                  events={pastEventReports}
-                />
-              </Column>
-            ) : null}
-          </>
-        ) : (
+        {activeTab.id === "messages" && Array.isArray(messages) ? (
+          <Column grow>
+            <GroupMessages
+              user={user}
+              events={[...(upcomingEvents || []), ...(pastEvents || [])]}
+              messages={messages}
+              isLoading={isLoadingMessages}
+              loadMoreMessages={loadMoreMessages}
+              loadMoreEvents={loadMorePastEvents}
+              createMessage={createMessage}
+              updateMessage={updateMessage}
+              createComment={createComment}
+              reportMessage={reportMessage}
+              deleteMessage={deleteMessage}
+            />
+          </Column>
+        ) : null}
+        {activeTab.id === "agenda" && hasEvents ? (
+          <Column grow>
+            <GroupEventList
+              title="Événements à venir"
+              events={upcomingEvents}
+            />
+            <GroupEventList
+              title="Événements passés"
+              events={pastEvents}
+              loadMore={loadMorePastEvents}
+              isLoading={isLoadingPastEvents}
+            />
+            <GroupLocation {...group} />
+            <ShareCard title="Partager le lien du groupe" />
+          </Column>
+        ) : null}
+        {activeTab.id === "reports" && hasEvents ? (
+          <Column grow>
+            <GroupEventList title="Comptes-rendus" events={pastEventReports} />
+          </Column>
+        ) : null}
+        {!hasEvents ? (
           <Column grow>
             <GroupDescription {...group} maxHeight="auto" />
             <ShareCard title="Inviter vos ami·es à rejoindre le groupe" />
             <GroupLocation {...group} />
           </Column>
-        )}
+        ) : null}
 
         <Column width="460px">
           <GroupUserActions {...group} />
@@ -269,6 +290,15 @@ DesktopGroupPage.propTypes = {
   isLoadingPastEvents: PropTypes.bool,
   loadMorePastEvents: PropTypes.func,
   pastEventReports: PropTypes.arrayOf(PropTypes.object),
+  messages: PropTypes.arrayOf(PropTypes.object),
+  isLoadingMessages: PropTypes.bool,
+  loadMoreMessages: PropTypes.func,
+  createMessage: PropTypes.func,
+  updateMessage: PropTypes.func,
+  createComment: PropTypes.func,
+  reportMessage: PropTypes.func,
+  deleteMessage: PropTypes.func,
+  user: PropTypes.object,
   tabs: PropTypes.arrayOf(PropTypes.object),
   activeTab: PropTypes.string,
 };

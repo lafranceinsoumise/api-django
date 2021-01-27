@@ -46,6 +46,7 @@ const StyledMessages = styled(PageFadeIn)`
 const StyledWrapper = styled.div`
   @media (max-width: ${style.collapse}px) {
     background-color: ${style.black50};
+    margin-top: 1rem;
   }
 `;
 
@@ -100,10 +101,10 @@ const GroupMessages = (props) => {
 
   return (
     <StyledWrapper>
-      {createMessage ? (
+      {user && createMessage ? (
         <MessageModalTrigger user={user} onClick={handleModalOpen} />
       ) : null}
-      {createMessage || updateMessage ? (
+      {(user && createMessage) || updateMessage ? (
         <MessageModal
           shouldShow={isModalOpen}
           onClose={handleModalClose}

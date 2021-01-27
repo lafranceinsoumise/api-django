@@ -182,10 +182,6 @@ export const CommentButton = (props) => {
   ) : null;
 };
 CommentButton.propTypes = {
-  user: PropTypes.shape({
-    fullName: PropTypes.string.isRequired,
-    avatar: PropTypes.string,
-  }).isRequired,
   onClick: PropTypes.func,
 };
 

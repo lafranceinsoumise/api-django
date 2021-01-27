@@ -6,6 +6,8 @@ import logger from "@agir/lib/utils/logger";
 
 import GROUP_PAGE_TABS from "./tabs.config.js";
 
+import MESSAGES from "./messages.json";
+
 const log = logger(__filename);
 
 export const useGroupDetail = (groupPk) => {
@@ -57,6 +59,15 @@ export const useGroupDetail = (groupPk) => {
   );
   log.debug("Group past event reports", pastEventReports);
 
+  const messages = MESSAGES;
+  const loadMoreMessages = console.log;
+  const createMessage = console.log;
+  const updateMessage = console.log;
+  const createComment = console.log;
+  const reportMessage = console.log;
+  const deleteMessage = console.log;
+  const isLoadingMessages = false;
+
   return {
     group,
     groupSuggestions,
@@ -67,6 +78,14 @@ export const useGroupDetail = (groupPk) => {
       pastEventCount > pastEvents.length ? loadMorePastEvents : undefined,
     isLoadingPastEvents,
     pastEventReports,
+    messages,
+    loadMoreMessages,
+    createMessage,
+    updateMessage,
+    createComment,
+    reportMessage,
+    deleteMessage,
+    isLoadingMessages,
   };
 };
 

@@ -6,6 +6,12 @@ const tabs = [
     isActive: (_, isMobile) => !!isMobile,
   },
   {
+    id: "messages",
+    slug: "discussion",
+    label: "Discussion",
+    isActive: ({ messages }) => Array.isArray(messages) && messages.length > 0,
+  },
+  {
     id: "agenda",
     slug: "agenda",
     label: "Agenda",

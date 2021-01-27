@@ -233,6 +233,7 @@ const StyledWrapper = styled.div`
     border-top: 1px solid ${style.black100};
 
     @media (max-width: ${style.collapse}px) {
+      padding-top: 1.5rem;
       margin-top: 1rem;
       border-top: none;
     }
@@ -439,7 +440,7 @@ const MessageCard = (props) => {
                   isLoading={isLoading}
                   user={user}
                   onSend={handleComment}
-                  onClick={handleClick}
+                  onClick={onClick && handleClick}
                 />
               )
             ) : null}
