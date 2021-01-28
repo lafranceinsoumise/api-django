@@ -37,7 +37,11 @@ const routeConfig = {
       if (group.isManager) {
         return true;
       }
-      return Array.isArray(pastEventReports) && pastEventReports.length > 0;
+      return (
+        group.isMember &&
+        Array.isArray(pastEventReports) &&
+        pastEventReports.length > 0
+      );
     },
   },
 };

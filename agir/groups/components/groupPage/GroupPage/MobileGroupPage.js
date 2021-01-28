@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { Switch, Route } from "react-router-dom";
 import { useSpring, animated } from "react-spring";
 import { useDrag } from "react-use-gesture";
@@ -27,6 +27,11 @@ import GroupEventList from "../GroupEventList";
 import GroupMessages from "../GroupMessages";
 import GroupMessage from "../GroupMessage";
 import GroupPageMenu from "../GroupPageMenu";
+import {
+  MemberEmptyEvents,
+  ManagerEmptyEvents,
+  EmptyReports,
+} from "../EmptyContent";
 
 export const MobileGroupPageSkeleton = () => (
   <Container style={{ margin: "2rem auto", padding: "0 1rem" }}>
@@ -42,6 +47,12 @@ const StyledTab = styled(animated.div)`
   max-width: 100%;
   margin: 0;
   padding: 0;
+  scroll-margin-top: 160px;
+
+  @media (max-width: ${style.collapse}px) {
+    scroll-margin-top: 120px;
+    min-height: 100vh;
+  }
 `;
 
 const Agenda = styled.div`
@@ -74,6 +85,11 @@ const Tab = (props) => {
     },
     { axis: "x", lockDirection: true }
   );
+  const tabRef = useRef();
+
+  useEffect(() => {
+    tabRef.current & tabRef.current.scrollIntoView();
+  }, []);
 
   return (
     <StyledTab
@@ -82,6 +98,7 @@ const Tab = (props) => {
         transform:
           xy && xy.interpolate((x) => (x ? `translate3d(${x}px, 0px, 0)` : "")),
       }}
+      ref={tabRef}
     >
       {children}
     </StyledTab>
@@ -112,25 +129,21 @@ const MessagesRoute = ({
 }) => (
   <Switch>
     <Route path={basePath} exact>
-      {Array.isArray(messages) && messages.length > 0 ? (
-        <GroupMessages
-          user={user}
-          events={allEvents}
-          messages={messages}
-          isLoading={isLoadingMessages}
-          onClick={onClickMessage}
-          loadMoreMessages={loadMoreMessages}
-          loadMoreEvents={loadMorePastEvents}
-          getMessageURL={getMessageURL}
-          createMessage={createMessage}
-          updateMessage={updateMessage}
-          createComment={createComment}
-          reportMessage={reportMessage}
-          deleteMessage={deleteMessage}
-        />
-      ) : (
-        "Pas de messages!"
-      )}
+      <GroupMessages
+        user={user}
+        events={allEvents}
+        messages={messages}
+        isLoading={isLoadingMessages}
+        onClick={onClickMessage}
+        loadMoreMessages={loadMoreMessages}
+        loadMoreEvents={loadMorePastEvents}
+        getMessageURL={getMessageURL}
+        createMessage={createMessage}
+        updateMessage={updateMessage}
+        createComment={createComment}
+        reportMessage={reportMessage}
+        deleteMessage={deleteMessage}
+      />
     </Route>
     <Route path={basePath + ":messagePk"} exact>
       {message ? (
@@ -171,6 +184,7 @@ MessagesRoute.propTypes = {
 };
 
 const AgendaRoute = ({
+  group,
   allEvents,
   upcomingEvents,
   pastEvents,
@@ -190,10 +204,16 @@ const AgendaRoute = ({
         isLoading={isLoadingPastEvents}
       />
     ) : null}
-    {allEvents.length === 0 && hasTabs ? "Pas d'événements" : null}
+    {allEvents.length === 0 && hasTabs && group.isManager ? (
+      <ManagerEmptyEvents />
+    ) : null}
+    {allEvents.length === 0 && hasTabs && !group.isManager && group.isMember ? (
+      <MemberEmptyEvents />
+    ) : null}
   </>
 );
 AgendaRoute.propTypes = {
+  group: PropTypes.object,
   allEvents: PropTypes.arrayOf(PropTypes.object),
   upcomingEvents: PropTypes.arrayOf(PropTypes.object),
   pastEvents: PropTypes.arrayOf(PropTypes.object),
@@ -206,7 +226,7 @@ const ReportsRoute = ({ pastEventReports }) => (
     {Array.isArray(pastEventReports) && pastEventReports.length > 0 ? (
       <GroupEventList title="Comptes-rendus" events={pastEventReports} />
     ) : (
-      "Pas de comptes-rendus"
+      <EmptyReports />
     )}
   </>
 );

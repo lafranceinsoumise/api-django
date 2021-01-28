@@ -13,6 +13,8 @@ import Skeleton from "@agir/front/genericComponents/Skeleton";
 import MessageModalTrigger from "@agir/front/formComponents/MessageModal/Trigger";
 import MessageModal from "@agir/front/formComponents/MessageModal/Modal";
 
+import { EmptyMessages } from "./EmptyContent";
+
 const StyledButton = styled.div`
   text-align: center;
 
@@ -45,7 +47,6 @@ const StyledMessages = styled(PageFadeIn)`
 `;
 const StyledWrapper = styled.div`
   @media (max-width: ${style.collapse}px) {
-    background-color: ${style.black50};
     margin-top: 1rem;
   }
 `;
@@ -120,7 +121,7 @@ const GroupMessages = (props) => {
         ready={Array.isArray(messages)}
         wait={<Skeleton style={{ margin: "1rem 0" }} />}
       >
-        {Array.isArray(messages) &&
+        {Array.isArray(messages) && messages.length > 0 ? (
           messages.map((message) => (
             <MessageCard
               key={message.id}
@@ -134,7 +135,12 @@ const GroupMessages = (props) => {
               onDelete={deleteMessage}
               messageURL={getMessageURL && getMessageURL(message.id)}
             />
-          ))}
+          ))
+        ) : (
+          <EmptyMessages
+            onClickSendMessage={createMessage ? handleModalOpen : undefined}
+          />
+        )}
         {typeof loadMoreMessages === "function" ? (
           <StyledButton>
             <Button

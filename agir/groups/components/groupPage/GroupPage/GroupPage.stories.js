@@ -96,3 +96,21 @@ ManagerView.args = {
   ...Default.args,
   group: { ...group, isManager: true, isMember: true },
 };
+export const EmptyMemberView = Template.bind({});
+EmptyMemberView.args = {
+  ...Default.args,
+  group: { ...group, isManager: false, isMember: true },
+  upcomingEvents: [],
+  pastEvents: [],
+  pastEventReports: [],
+  messages: [],
+};
+export const EmptyManagerView = Template.bind({});
+EmptyManagerView.args = {
+  ...Default.args,
+  group: { ...group, isManager: true, isMember: true },
+  upcomingEvents: [],
+  pastEvents: [],
+  pastEventReports: [],
+  messages: [],
+};

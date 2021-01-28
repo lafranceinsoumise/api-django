@@ -81,7 +81,7 @@ export const useGroupDetail = (groupPk, messagePk) => {
       pastEventCount > pastEvents.length ? loadMorePastEvents : undefined,
     isLoadingPastEvents,
     pastEventReports,
-    messages,
+    messages: [],
     message,
     loadMoreMessages,
     createMessage,

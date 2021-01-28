@@ -152,3 +152,104 @@ export const Default = () => {
     </div>
   );
 };
+
+export const Empty = () => {
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [comments, setComments] = React.useState();
+  const [messages, setMessages] = React.useState();
+
+  React.useEffect(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+      setComments({});
+      setMessages({});
+    }, 2000);
+    //eslint-disable-next-line
+  }, []);
+
+  const msgs = React.useMemo(
+    () =>
+      messages
+        ? _sortBy(
+            Object.values(messages)
+              .filter(Boolean)
+              .map((message) => ({
+                ...message,
+                comments: (comments && comments[message.id]) || [],
+              })),
+            ["created"]
+          ).reverse()
+        : null,
+    [messages, comments]
+  );
+
+  const saveMessage = React.useCallback((message, relatedMessage) => {
+    if (relatedMessage) {
+      const msg = {
+        content: message,
+        id: message.id || Date.now(),
+        created: new Date().toUTCString(),
+        author: args.user,
+      };
+      setComments((state) => ({
+        ...state,
+        [relatedMessage.id]: [...(state[relatedMessage.id] || []), msg],
+      }));
+    } else {
+      const msg = {
+        ...message,
+        id: message.id || Date.now(),
+        created: new Date().toUTCString(),
+        author: args.user,
+        linkedEvent: message.linkedEvent.id ? message.linkedEvent : null,
+      };
+      setMessages((state) => ({
+        ...state,
+        [msg.id]: msg,
+      }));
+    }
+  }, []);
+
+  const deleteMessage = React.useCallback(
+    (message, relatedMessage) => {
+      if (relatedMessage && comments[relatedMessage.id]) {
+        setComments((state) => ({
+          ...state,
+          [relatedMessage.id]: (state[relatedMessage.id] || []).filter(
+            (comment) => comment.id !== message.id
+          ),
+        }));
+      }
+      if (messages[message.id]) {
+        setMessages((state) => ({
+          ...state,
+          [message.id]: null,
+        }));
+        setComments((state) => ({
+          ...state,
+          [message.id]: [],
+        }));
+      }
+    },
+    [messages, comments]
+  );
+
+  return (
+    <div
+      style={{
+        maxWidth: 640,
+        margin: "0 auto",
+      }}
+    >
+      <GroupMessages
+        {...args}
+        isLoading={isLoading}
+        messages={msgs}
+        createMessage={saveMessage}
+        updateMessage={saveMessage}
+        deleteMessage={deleteMessage}
+        createComment={saveMessage}
+      />
+    </div>
+  );
+};
