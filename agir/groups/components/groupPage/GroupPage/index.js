@@ -23,8 +23,6 @@ import { useGroupDetail } from "./hooks";
 const GroupPage = (props) => {
   const { groupPk, messagePk } = props;
 
-  console.log(messagePk);
-
   const isSessionLoaded = useSelector(getIsSessionLoaded);
   const isConnected = useSelector(getIsConnected);
   const backLink = useSelector(getBackLink);
@@ -39,6 +37,7 @@ const GroupPage = (props) => {
     loadMorePastEvents,
     isLoadingPastEvents,
     pastEventReports,
+    message,
     messages,
     loadMoreMessages,
     isLoadingMessages,
@@ -77,6 +76,7 @@ const GroupPage = (props) => {
       isLoadingPastEvents={isLoadingPastEvents}
       loadMorePastEvents={loadMorePastEvents}
       pastEventReports={pastEventReports}
+      message={message}
       messages={messages}
       isLoadingMessages={isLoadingMessages}
       loadMoreMessages={loadMoreMessages}

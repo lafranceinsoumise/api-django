@@ -56,7 +56,7 @@ const GroupMessages = (props) => {
     messages,
     events,
     isLoading,
-    messageURLBase,
+    getMessageURL,
     onClick,
     createMessage,
     updateMessage,
@@ -132,9 +132,7 @@ const GroupMessages = (props) => {
               onComment={createComment}
               onReport={reportMessage}
               onDelete={deleteMessage}
-              messageURL={
-                messageURLBase ? messageURLBase.replace(":id", message.id) : ""
-              }
+              messageURL={getMessageURL && getMessageURL(message.id)}
             />
           ))}
         {typeof loadMoreMessages === "function" ? (
@@ -158,7 +156,7 @@ GroupMessages.propTypes = {
   events: PropTypes.arrayOf(PropTypes.object),
   messages: PropTypes.arrayOf(PropTypes.object),
   isLoading: PropTypes.bool,
-  messageURLBase: PropTypes.string,
+  getMessageURL: PropTypes.func,
   onClick: PropTypes.func,
   createMessage: PropTypes.func,
   updateMessage: PropTypes.func,

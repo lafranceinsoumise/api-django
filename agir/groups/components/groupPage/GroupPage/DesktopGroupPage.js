@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { Switch, Route } from "react-router-dom";
 import styled from "styled-components";
 
@@ -24,6 +24,7 @@ import GroupDonation from "../GroupDonation";
 import GroupSuggestions from "../GroupSuggestions";
 import GroupEventList from "../GroupEventList";
 import GroupMessages from "../GroupMessages";
+import GroupMessage from "../GroupMessage";
 import GroupPageMenu from "../GroupPageMenu";
 
 const IndexLinkAnchor = styled(Link)`
@@ -86,7 +87,9 @@ export const DesktopGroupPageSkeleton = () => (
 const MessagesRoute = ({
   user,
   allEvents,
+  message,
   messages,
+  getMessageURL,
   isLoadingMessages,
   loadMoreMessages,
   loadMorePastEvents,
@@ -95,27 +98,55 @@ const MessagesRoute = ({
   createComment,
   reportMessage,
   deleteMessage,
-}) =>
-  Array.isArray(messages) && messages.length > 0 ? (
-    <GroupMessages
-      user={user}
-      events={allEvents}
-      messages={messages}
-      isLoading={isLoadingMessages}
-      loadMoreMessages={loadMoreMessages}
-      loadMoreEvents={loadMorePastEvents}
-      createMessage={createMessage}
-      updateMessage={updateMessage}
-      createComment={createComment}
-      reportMessage={reportMessage}
-      deleteMessage={deleteMessage}
-    />
-  ) : (
-    "Pas de messages!"
-  );
+  onClickMessage,
+  basePath,
+}) => (
+  <Switch>
+    <Route path={basePath} exact>
+      {Array.isArray(messages) && messages.length > 0 ? (
+        <GroupMessages
+          user={user}
+          events={allEvents}
+          messages={messages}
+          getMessageURL={getMessageURL}
+          isLoading={isLoadingMessages}
+          onClick={onClickMessage}
+          loadMoreMessages={loadMoreMessages}
+          loadMoreEvents={loadMorePastEvents}
+          createMessage={createMessage}
+          updateMessage={updateMessage}
+          createComment={createComment}
+          reportMessage={reportMessage}
+          deleteMessage={deleteMessage}
+        />
+      ) : (
+        "Pas de messages!"
+      )}
+    </Route>
+    <Route path={basePath + ":messagePk"} exact>
+      {message ? (
+        <GroupMessage
+          user={user}
+          events={allEvents}
+          message={message}
+          getMessageURL={getMessageURL}
+          isLoading={isLoadingMessages}
+          loadMoreEvents={loadMorePastEvents}
+          updateMessage={updateMessage}
+          createComment={createComment}
+          reportMessage={reportMessage}
+          deleteMessage={deleteMessage}
+        />
+      ) : (
+        "Pas de message!"
+      )}
+    </Route>
+  </Switch>
+);
 MessagesRoute.propTypes = {
   allEvents: PropTypes.arrayOf(PropTypes.object),
   loadMorePastEvents: PropTypes.func,
+  message: PropTypes.object,
   messages: PropTypes.arrayOf(PropTypes.object),
   isLoadingMessages: PropTypes.bool,
   loadMoreMessages: PropTypes.func,
@@ -124,8 +155,12 @@ MessagesRoute.propTypes = {
   createComment: PropTypes.func,
   reportMessage: PropTypes.func,
   deleteMessage: PropTypes.func,
+  onClickMessage: PropTypes.func,
   user: PropTypes.object,
+  getMessageURL: PropTypes.func,
+  basePath: PropTypes.string,
 };
+
 const AgendaRoute = ({
   group,
   allEvents,
@@ -189,11 +224,33 @@ const DesktopGroupPage = (props) => {
     pastEvents,
   } = props;
 
-  const { hasTabs, tabs, activeTabIndex } = useTabs(props, false);
+  const { hasTabs, tabs, activeTabIndex, onTabChange } = useTabs(props, false);
 
   const allEvents = useMemo(
     () => [...(upcomingEvents || []), ...(pastEvents || [])],
     [upcomingEvents, pastEvents]
+  );
+
+  const handleClickMessage = useCallback(
+    (message) => {
+      const messagesTab = tabs.find((tab) => tab.id === "messages");
+      if (messagesTab) {
+        return (
+          onTabChange && onTabChange(messagesTab, { messagePk: message.id })
+        );
+      }
+    },
+    [tabs, onTabChange]
+  );
+
+  const getMessageURL = useCallback(
+    (messagePk) => {
+      const messagesTab = tabs.find((tab) => tab.id === "messages");
+      if (messagesTab) {
+        return messagesTab.getLink({ messagePk });
+      }
+    },
+    [tabs]
   );
 
   if (!group) {
@@ -247,7 +304,9 @@ const DesktopGroupPage = (props) => {
                     {...props}
                     allEvents={allEvents}
                     hasTabs={hasTabs}
-                    messageURLBase={messageURLBase}
+                    onClickMessage={handleClickMessage}
+                    getMessageURL={getMessageURL}
+                    basePath={tab.getLink()}
                   />
                 </Column>
               </Route>

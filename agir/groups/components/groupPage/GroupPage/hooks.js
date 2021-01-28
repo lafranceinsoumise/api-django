@@ -61,7 +61,7 @@ export const useGroupDetail = (groupPk, messagePk) => {
   log.debug("Group past event reports", pastEventReports);
 
   const messages = MESSAGES;
-  const message = messagePk ? MESSAGES[0] : null;
+  const message = messagePk ? MESSAGES.find((m) => m.id === messagePk) : null;
 
   const loadMoreMessages = console.log;
   const createMessage = console.log;
@@ -106,7 +106,7 @@ export const useTabs = (props, isMobile = true) => {
         (route) =>
           new RouteConfig({
             ...route,
-            pathname: `/groupes/${props.group.id}${route.pathname}`,
+            params: { groupPk: props.group.id },
           })
       ),
     [props, isMobile]
@@ -129,8 +129,8 @@ export const useTabs = (props, isMobile = true) => {
   }, [routes, location.pathname]);
 
   const handleTabChange = useCallback(
-    (route) => {
-      route && route.getLink && history.push(route.getLink());
+    (route, params) => {
+      route && route.getLink && history.push(route.getLink(params));
     },
     [history]
   );
@@ -148,6 +148,11 @@ export const useTabs = (props, isMobile = true) => {
   useEffect(() => {
     shouldRedirect && handleTabChange(activeTab);
   }, [shouldRedirect, handleTabChange, activeTab]);
+
+  useMemo(() => {
+    window.scrollTo(0, 0);
+    // eslint-disable-next-line
+  }, [location.pathname]);
 
   return {
     tabs: routes,

@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { Switch, Route } from "react-router-dom";
 import { useSpring, animated } from "react-spring";
 import { useDrag } from "react-use-gesture";
@@ -25,6 +25,7 @@ import GroupDonation from "../GroupDonation";
 import GroupSuggestions from "../GroupSuggestions";
 import GroupEventList from "../GroupEventList";
 import GroupMessages from "../GroupMessages";
+import GroupMessage from "../GroupMessage";
 import GroupPageMenu from "../GroupPageMenu";
 
 export const MobileGroupPageSkeleton = () => (
@@ -78,7 +79,8 @@ const Tab = (props) => {
     <StyledTab
       {...bind(50)}
       style={{
-        transform: xy && xy.interpolate((x) => `translate3d(${x}px, 0px, 0)`),
+        transform:
+          xy && xy.interpolate((x) => (x ? `translate3d(${x}px, 0px, 0)` : "")),
       }}
     >
       {children}
@@ -92,10 +94,11 @@ Tab.propTypes = {
 };
 
 const MessagesRoute = ({
-  messageURLBase,
-  messages,
   user,
   allEvents,
+  message,
+  messages,
+  basePath,
   isLoadingMessages,
   loadMoreMessages,
   loadMorePastEvents,
@@ -104,32 +107,55 @@ const MessagesRoute = ({
   createComment,
   reportMessage,
   deleteMessage,
+  onClickMessage,
+  getMessageURL,
 }) => (
-  <>
-    {Array.isArray(messages) && messages.length > 0 ? (
-      <GroupMessages
-        messageURLBase={messageURLBase}
-        user={user}
-        events={allEvents}
-        messages={messages}
-        isLoading={isLoadingMessages}
-        loadMoreMessages={loadMoreMessages}
-        loadMoreEvents={loadMorePastEvents}
-        createMessage={createMessage}
-        updateMessage={updateMessage}
-        createComment={createComment}
-        reportMessage={reportMessage}
-        deleteMessage={deleteMessage}
-      />
-    ) : (
-      "Pas de messages!"
-    )}
-  </>
+  <Switch>
+    <Route path={basePath} exact>
+      {Array.isArray(messages) && messages.length > 0 ? (
+        <GroupMessages
+          user={user}
+          events={allEvents}
+          messages={messages}
+          isLoading={isLoadingMessages}
+          onClick={onClickMessage}
+          loadMoreMessages={loadMoreMessages}
+          loadMoreEvents={loadMorePastEvents}
+          getMessageURL={getMessageURL}
+          createMessage={createMessage}
+          updateMessage={updateMessage}
+          createComment={createComment}
+          reportMessage={reportMessage}
+          deleteMessage={deleteMessage}
+        />
+      ) : (
+        "Pas de messages!"
+      )}
+    </Route>
+    <Route path={basePath + ":messagePk"} exact>
+      {message ? (
+        <GroupMessage
+          user={user}
+          events={allEvents}
+          message={message}
+          isLoading={isLoadingMessages}
+          getMessageURL={getMessageURL}
+          loadMoreEvents={loadMorePastEvents}
+          updateMessage={updateMessage}
+          createComment={createComment}
+          reportMessage={reportMessage}
+          deleteMessage={deleteMessage}
+        />
+      ) : (
+        "Pas de message!"
+      )}
+    </Route>
+  </Switch>
 );
 MessagesRoute.propTypes = {
-  messageURLBase: PropTypes.string,
   allEvents: PropTypes.arrayOf(PropTypes.object),
   loadMorePastEvents: PropTypes.func,
+  message: PropTypes.object,
   messages: PropTypes.arrayOf(PropTypes.object),
   isLoadingMessages: PropTypes.bool,
   loadMoreMessages: PropTypes.func,
@@ -138,8 +164,12 @@ MessagesRoute.propTypes = {
   createComment: PropTypes.func,
   reportMessage: PropTypes.func,
   deleteMessage: PropTypes.func,
+  onClickMessage: PropTypes.func,
   user: PropTypes.object,
+  basePath: PropTypes.string,
+  getMessageURL: PropTypes.func,
 };
+
 const AgendaRoute = ({
   allEvents,
   upcomingEvents,
@@ -257,12 +287,27 @@ const MobileGroupPage = (props) => {
     [upcomingEvents, pastEvents]
   );
 
-  const messageURLBase = useMemo(() => {
-    const messagesTab = tabs.find((tab) => tab.id === "messages");
-    if (messagesTab) {
-      return messagesTab.getLink();
-    }
-  }, [tabs]);
+  const handleClickMessage = useCallback(
+    (message) => {
+      const messagesTab = tabs.find((tab) => tab.id === "messages");
+      if (messagesTab) {
+        return (
+          onTabChange && onTabChange(messagesTab, { messagePk: message.id })
+        );
+      }
+    },
+    [tabs, onTabChange]
+  );
+
+  const getMessageURL = useCallback(
+    (messagePk) => {
+      const messagesTab = tabs.find((tab) => tab.id === "messages");
+      if (messagesTab) {
+        return messagesTab.getLink({ messagePk });
+      }
+    },
+    [tabs]
+  );
 
   if (!group) {
     return null;
@@ -289,7 +334,9 @@ const MobileGroupPage = (props) => {
                   allEvents={allEvents}
                   hasTabs={hasTabs}
                   goToAgendaTab={goToAgendaTab}
-                  messageURLBase={messageURLBase}
+                  getMessageURL={getMessageURL}
+                  onClickMessage={handleClickMessage}
+                  basePath={tab.getLink()}
                 />
               </Tab>
             </Route>

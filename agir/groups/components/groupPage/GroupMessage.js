@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
 import style from "@agir/front/genericComponents/_variables.scss";
@@ -25,7 +25,7 @@ const GroupMessages = (props) => {
     message,
     events,
     isLoading,
-    messageURLBase,
+    getMessageURL,
     onClick,
     updateMessage,
     createComment,
@@ -33,6 +33,11 @@ const GroupMessages = (props) => {
     deleteMessage,
     loadMoreEvents,
   } = props;
+
+  const messageURL = useMemo(
+    () => getMessageURL && message.id && getMessageURL(message.id),
+    [getMessageURL, message.id]
+  );
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -77,8 +82,9 @@ const GroupMessages = (props) => {
             onComment={createComment}
             onReport={reportMessage}
             onDelete={deleteMessage}
-            messageURL={messageURLBase ? messageURLBase + message.id + "/" : ""}
+            messageURL={messageURL}
             withMobileCommentField
+            scrollIn
           />
         )}
       </StyledMessages>
@@ -90,7 +96,7 @@ GroupMessages.propTypes = {
   events: PropTypes.arrayOf(PropTypes.object),
   message: PropTypes.object,
   isLoading: PropTypes.bool,
-  messageURLBase: PropTypes.string,
+  getMessageURL: PropTypes.func,
   onClick: PropTypes.func,
   createMessage: PropTypes.func,
   updateMessage: PropTypes.func,

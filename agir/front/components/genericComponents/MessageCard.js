@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import styled from "styled-components";
 
 import { FaWhatsapp, FaTelegram, FaFacebook, FaTwitter } from "react-icons/fa";
@@ -223,10 +223,13 @@ const StyledWrapper = styled.div`
   flex-flow: row nowrap;
   align-items: flex-start;
   background-color: white;
+  scroll-margin-top: 160px;
 
   @media (max-width: ${style.collapse}px) {
+    scroll-margin-top: 120px;
     padding: 1.5rem 1rem;
     box-shadow: ${style.elaborateShadow};
+    min-height: 100vh;
   }
 
   & + & {
@@ -277,15 +280,28 @@ const MessageCard = (props) => {
     onEdit,
     onReport,
     withMobileCommentField,
+    scrollIn,
   } = props;
 
   const { author, content, created, linkedEvent } = message;
+
+  const messageCardRef = useRef();
+
   const event = useMemo(() => formatEvent(linkedEvent), [linkedEvent]);
   const isAuthor = useMemo(() => author.id === user.id, [author, user]);
-  const encodedMessageURL = useMemo(
-    () => messageURL && encodeURIComponent(messageURL),
-    [messageURL]
-  );
+  const encodedMessageURL = useMemo(() => {
+    if (messageURL) {
+      const url =
+        window &&
+        window.location &&
+        window.location.origin &&
+        !messageURL.includes("http")
+          ? window.location.origin + messageURL
+          : messageURL;
+
+      return encodeURIComponent(url);
+    }
+  }, [messageURL]);
   const [isURLCopied, copyURL] = useCopyToClipboard(encodedMessageURL);
 
   const hasActions = useMemo(
@@ -325,15 +341,24 @@ const MessageCard = (props) => {
     [message, onDelete]
   );
 
+  useEffect(() => {
+    scrollIn &&
+      messageCardRef.current &&
+      messageCardRef.current.scrollIntoView &&
+      messageCardRef.current.scrollIntoView();
+  }, [scrollIn]);
+
   return (
-    <StyledWrapper>
+    <StyledWrapper ref={messageCardRef}>
       <Avatar {...author} />
       <StyledMessage>
         <StyledHeader>
           <Avatar {...author} />
           <h4>
             <strong>{author.fullName}</strong>
-            <em onClick={handleClick}>{created ? timeAgo(created) : null}</em>
+            <em onClick={handleClick} style={{ cursor: "pointer" }}>
+              {created ? timeAgo(created) : null}
+            </em>
           </h4>
           <StyledAction>
             {encodedMessageURL ? (
@@ -399,7 +424,7 @@ const MessageCard = (props) => {
             ) : null}
           </StyledAction>
         </StyledHeader>
-        <StyledContent onClick={handleClick}>
+        <StyledContent>
           {content.split("\n").map((paragraph, i) => (
             <p key={i + "__" + paragraph}>{paragraph}</p>
           ))}

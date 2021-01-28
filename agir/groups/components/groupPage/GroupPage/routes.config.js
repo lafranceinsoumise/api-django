@@ -1,13 +1,13 @@
 const routeConfig = {
   info: {
     id: "info",
-    pathname: "/presentation/",
+    pathname: "/groupes/:groupPk/presentation/",
     label: "Présentation",
     hasRoute: (_, isMobile) => !!isMobile,
   },
   messages: {
     id: "messages",
-    pathname: "/discussion/:messagePk?/",
+    pathname: "/groupes/:groupPk/discussion/:messagePk?/",
     label: "Discussion",
     hasRoute: ({ group, messages }) => {
       if (group.isManager) {
@@ -18,7 +18,7 @@ const routeConfig = {
   },
   agenda: {
     id: "agenda",
-    pathname: "/agenda/",
+    pathname: "/groupes/:groupPk/agenda/",
     label: "Agenda",
     hasRoute: ({ group, pastEvents, upcomingEvents }, isMobile) => {
       if (group.isMember || !isMobile) {
@@ -31,7 +31,7 @@ const routeConfig = {
   },
   reports: {
     id: "reports",
-    pathname: "/comptes-rendus/",
+    pathname: "/groupes/:groupPk/comptes-rendus/",
     label: "Comptes-rendus",
     hasRoute: ({ group, pastEventReports }) => {
       if (group.isManager) {

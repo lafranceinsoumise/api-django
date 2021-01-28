@@ -28,8 +28,11 @@ export class RouteConfig {
     Object.keys(props).forEach((key) => (this[key] = props[key]));
 
     this.__keys__ = [];
+    const pathname = Array.isArray(this.pathname)
+      ? this.pathname[0]
+      : this.pathname;
     this.__re__ = pathToRegexp(this.pathname, this.__keys__);
-    this.__toPath__ = pathToRegexp.compile(this.pathname);
+    this.__toPath__ = pathToRegexp.compile(pathname);
 
     this.match = this.match.bind(this);
     this.getLink = this.getLink.bind(this);
@@ -51,10 +54,13 @@ export class RouteConfig {
    */
   getLink(params) {
     try {
-      params = params || {};
+      params = {
+        ...(this.params || {}),
+        ...(params || {}),
+      };
       return this.__toPath__(params);
     } catch (e) {
-      return this.pathname;
+      return Array.isArray(this.pathname) ? this.pathname[0] : this.pathname;
     }
   }
 }
