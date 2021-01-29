@@ -125,22 +125,18 @@ const MessagesRoute = ({
       />
     </Route>
     <Route path={basePath + ":messagePk"} exact>
-      {message ? (
-        <GroupMessage
-          user={user}
-          events={allEvents}
-          message={message}
-          getMessageURL={getMessageURL}
-          isLoading={isLoadingMessages}
-          loadMoreEvents={loadMorePastEvents}
-          updateMessage={updateMessage}
-          createComment={createComment}
-          reportMessage={reportMessage}
-          deleteMessage={deleteMessage}
-        />
-      ) : (
-        "Pas de message!"
-      )}
+      <GroupMessage
+        user={user}
+        events={allEvents}
+        message={message}
+        getMessageURL={getMessageURL}
+        isLoading={isLoadingMessages}
+        loadMoreEvents={loadMorePastEvents}
+        updateMessage={updateMessage}
+        createComment={createComment}
+        reportMessage={reportMessage}
+        deleteMessage={deleteMessage}
+      />
     </Route>
   </Switch>
 );
@@ -171,7 +167,19 @@ const AgendaRoute = ({
   isLoadingPastEvents,
   hasTabs,
 }) =>
-  allEvents.length > 0 ? (
+  Array.isArray(upcomingEvents) &&
+  Array.isArray(pastEvents) &&
+  allEvents.length === 0 ? (
+    <>
+      {hasTabs && group.isManager ? <ManagerEmptyEvents /> : null}
+      {hasTabs && !group.isManager && group.isMember ? (
+        <MemberEmptyEvents />
+      ) : null}
+      <GroupDescription {...group} maxHeight="auto" />
+      <ShareCard title="Inviter vos ami·es à rejoindre le groupe" />
+      <GroupLocation {...group} />
+    </>
+  ) : (
     <>
       <GroupEventList title="Événements à venir" events={upcomingEvents} />
       <GroupEventList
@@ -182,16 +190,6 @@ const AgendaRoute = ({
       />
       <GroupLocation {...group} />
       <ShareCard title="Partager le lien du groupe" />
-    </>
-  ) : (
-    <>
-      {hasTabs && group.isManager ? <ManagerEmptyEvents /> : null}
-      {hasTabs && !group.isManager && group.isMember ? (
-        <MemberEmptyEvents />
-      ) : null}
-      <GroupDescription {...group} maxHeight="auto" />
-      <ShareCard title="Inviter vos ami·es à rejoindre le groupe" />
-      <GroupLocation {...group} />
     </>
   );
 AgendaRoute.propTypes = {
@@ -204,10 +202,10 @@ AgendaRoute.propTypes = {
   hasTabs: PropTypes.bool,
 };
 const ReportsRoute = ({ pastEventReports }) =>
-  Array.isArray(pastEventReports) && pastEventReports.length > 0 ? (
-    <GroupEventList title="Comptes-rendus" events={pastEventReports} />
-  ) : (
+  Array.isArray(pastEventReports) && pastEventReports.length === 0 ? (
     <EmptyReports />
+  ) : (
+    <GroupEventList title="Comptes-rendus" events={pastEventReports} />
   );
 ReportsRoute.propTypes = {
   pastEventReports: PropTypes.arrayOf(PropTypes.object),

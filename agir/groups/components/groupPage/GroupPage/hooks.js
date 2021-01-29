@@ -11,65 +11,190 @@ import MESSAGES from "./messages.json";
 
 const log = logger(__filename);
 
-export const useGroupDetail = (groupPk, messagePk) => {
-  const { data: group } = useSWR(`/api/groupes/${groupPk}`);
-  log.debug("Group data", group);
-
-  const { data: groupSuggestions } = useSWR(
-    `/api/groupes/${groupPk}/suggestions`
+export const useUpcomingEvents = (group) => {
+  const hasUpcomingEvents = group && group.hasUpcomingEvents;
+  const { data } = useSWR(
+    hasUpcomingEvents ? `/api/groupes/${group.id}/evenements/a-venir` : null
   );
-  log.debug("Group suggestions", groupSuggestions);
+  log.debug("Group upcoming events", data);
+  return group && group.hasUpcomingEvents ? data : [];
+};
 
-  const { data: upcomingEvents } = useSWR(
-    `/api/groupes/${groupPk}/evenements/a-venir`
-  );
-  log.debug("Group upcoming events", upcomingEvents);
-
-  const { data: pastEventData, size, setSize, isValidating } = useSWRInfinite(
-    (pageIndex) =>
-      `/api/groupes/${groupPk}/evenements/passes?page=${
-        pageIndex + 1
-      }&page_size=3`
+export const usePastEvents = (group) => {
+  const hasPastEvents = group && group.hasPastEvents;
+  const {
+    data,
+    size: pastEventsSize,
+    setSize: setPastEventsSize,
+    isValidating: isValidatingPastEvents,
+  } = useSWRInfinite((pageIndex) =>
+    hasPastEvents
+      ? `/api/groupes/${group.id}/evenements/passes?page=${
+          pageIndex + 1
+        }&page_size=3`
+      : null
   );
   const pastEvents = useMemo(() => {
     let events = [];
-    if (!Array.isArray(pastEventData)) {
+    if (!hasPastEvents) {
       return events;
     }
-    pastEventData.forEach(({ results }) => {
+    if (!Array.isArray(data)) {
+      return events;
+    }
+    data.forEach(({ results }) => {
       if (Array.isArray(results)) {
         events = events.concat(results);
       }
     });
     return events;
-  }, [pastEventData]);
+  }, [hasPastEvents, data]);
   log.debug("Group past events", pastEvents);
+
   const pastEventCount = useMemo(() => {
-    if (!Array.isArray(pastEventData) || !pastEventData[0]) {
+    if (!hasPastEvents || !Array.isArray(data) || !data[0]) {
       return 0;
     }
-    return pastEventData[0].count;
-  }, [pastEventData]);
+    return data[0].count;
+  }, [hasPastEvents, data]);
+
   const loadMorePastEvents = useCallback(() => {
-    setSize(size + 1);
-  }, [setSize, size]);
-  const isLoadingPastEvents = !pastEventData || isValidating;
+    setPastEventsSize(pastEventsSize + 1);
+  }, [setPastEventsSize, pastEventsSize]);
 
-  const { data: pastEventReports } = useSWR(
-    `/api/groupes/${groupPk}/evenements/compte-rendus`
+  const isLoadingPastEvents =
+    hasPastEvents && (!data || isValidatingPastEvents);
+
+  return {
+    pastEvents,
+    pastEventCount,
+    loadMorePastEvents:
+      hasPastEvents && pastEvents && pastEventCount > pastEvents.length
+        ? loadMorePastEvents
+        : undefined,
+    isLoadingPastEvents,
+  };
+};
+
+const usePastEventReports = (group) => {
+  const hasPastEventReports =
+    group && group.isMember && group.hasPastEventReports;
+  const { data } = useSWR(
+    hasPastEventReports
+      ? `/api/groupes/${group.id}/evenements/compte-rendus`
+      : null
   );
-  log.debug("Group past event reports", pastEventReports);
+  log.debug("Group past event reports", data);
 
-  const messages = MESSAGES;
-  const message = messagePk ? MESSAGES.find((m) => m.id === messagePk) : null;
+  return hasPastEventReports ? data : [];
+};
 
-  const loadMoreMessages = console.log;
+const useMessages = (group) => {
+  const hasMessages = group && group.isMember && group.hasMessages;
+  const {
+    data: messagesData,
+    size: messagesSize,
+    setSize: setMessagesSize,
+    isValidating: isValidatingMessages,
+  } = useSWRInfinite(
+    (pageIndex) =>
+      hasMessages
+        ? `/api/groupes/${group.id}/messages?page=${pageIndex + 1}&page_size=3`
+        : null,
+    // TEMP: custom fetcher to return fake data
+    async (url) =>
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(
+            url ? { count: MESSAGES.length * 2, results: MESSAGES } : undefined
+          );
+        }, 3000);
+      })
+  );
+
+  const messages = useMemo(() => {
+    let messages = [];
+    if (!hasMessages) {
+      return messages;
+    }
+    if (!Array.isArray(messagesData)) {
+      return messagesData;
+    }
+    messagesData.forEach(({ results }) => {
+      if (Array.isArray(results)) {
+        messages = messages.concat(results);
+      }
+    });
+    return messages;
+  }, [hasMessages, messagesData]);
+  log.debug("Group messages", messages);
+
+  const messagesCount = useMemo(() => {
+    if (!hasMessages || !Array.isArray(messagesData) || !messagesData[0]) {
+      return 0;
+    }
+    return messagesData[0].count;
+  }, [hasMessages, messagesData]);
+  const loadMoreMessages = useCallback(() => {
+    setMessagesSize(messagesSize + 1);
+  }, [setMessagesSize, messagesSize]);
+  const isLoadingMessages =
+    hasMessages && (!messagesData || isValidatingMessages);
+
+  return {
+    messages,
+    loadMoreMessages:
+      hasMessages && messages && messagesCount > messages.length
+        ? loadMoreMessages
+        : undefined,
+    isLoadingMessages,
+  };
+};
+
+const useMessage = (group, messagePk) => {
+  const hasMessage = group && group.isMember && messagePk;
+  const { data } = useSWR(
+    hasMessage ? `/api/groupes/${group.id}/messages/${messagePk}` : null,
+    // TEMP: custom fetcher to return fake data
+    async (url) =>
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(url ? MESSAGES.find((m) => m.id === messagePk) : undefined);
+        }, 3000);
+      })
+  );
+  log.debug("Group message #" + messagePk, data);
+
+  return hasMessage ? data : null;
+};
+
+export const useGroupDetail = (groupPk, messagePk) => {
+  // GROUP DATA
+  const { data: group } = useSWR(`/api/groupes/${groupPk}`);
+  log.debug("Group data", group);
+
+  // GROUP SUGGESTIONS
+  const { data: groupSuggestions } = useSWR(
+    `/api/groupes/${groupPk}/suggestions`
+  );
+  log.debug("Group suggestions", groupSuggestions);
+
+  const upcomingEvents = useUpcomingEvents(group);
+  const {
+    pastEvents,
+    pastEventCount,
+    isLoadingPastEvents,
+    loadMorePastEvents,
+  } = usePastEvents(group);
+  const pastEventReports = usePastEventReports(group);
+  const { messages, isLoadingMessages, loadMoreMessages } = useMessages(group);
+  const message = useMessage(group, messagePk);
+
   const createMessage = console.log;
   const updateMessage = console.log;
   const createComment = console.log;
   const reportMessage = console.log;
   const deleteMessage = console.log;
-  const isLoadingMessages = false;
 
   return {
     group: group,
@@ -77,39 +202,41 @@ export const useGroupDetail = (groupPk, messagePk) => {
     upcomingEvents,
     pastEvents,
     pastEventCount,
-    loadMorePastEvents:
-      pastEventCount > pastEvents.length ? loadMorePastEvents : undefined,
+    loadMorePastEvents,
     isLoadingPastEvents,
     pastEventReports,
-    messages: [],
+    messages,
     message,
     loadMoreMessages,
+    isLoadingMessages,
     createMessage,
     updateMessage,
     createComment,
     reportMessage,
     deleteMessage,
-    isLoadingMessages,
   };
 };
 
 export const useTabs = (props, isMobile = true) => {
   const history = useHistory();
   const location = useLocation();
+
+  const { group } = props;
+
   const routes = useMemo(
     () =>
       GROUP_PAGE_ROUTES.filter((route) =>
         typeof route.hasRoute === "function"
-          ? route.hasRoute(props, isMobile)
+          ? route.hasRoute(group, isMobile)
           : route.hasRoute
       ).map(
         (route) =>
           new RouteConfig({
             ...route,
-            params: { groupPk: props.group.id },
+            params: { groupPk: group.id },
           })
       ),
-    [props, isMobile]
+    [group, isMobile]
   );
 
   const { activeTab, activeTabIndex, shouldRedirect } = useMemo(() => {

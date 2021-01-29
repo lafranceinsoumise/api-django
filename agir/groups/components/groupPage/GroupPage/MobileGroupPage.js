@@ -146,22 +146,18 @@ const MessagesRoute = ({
       />
     </Route>
     <Route path={basePath + ":messagePk"} exact>
-      {message ? (
-        <GroupMessage
-          user={user}
-          events={allEvents}
-          message={message}
-          isLoading={isLoadingMessages}
-          getMessageURL={getMessageURL}
-          loadMoreEvents={loadMorePastEvents}
-          updateMessage={updateMessage}
-          createComment={createComment}
-          reportMessage={reportMessage}
-          deleteMessage={deleteMessage}
-        />
-      ) : (
-        "Pas de message!"
-      )}
+      <GroupMessage
+        user={user}
+        events={allEvents}
+        message={message}
+        isLoading={isLoadingMessages}
+        getMessageURL={getMessageURL}
+        loadMoreEvents={loadMorePastEvents}
+        updateMessage={updateMessage}
+        createComment={createComment}
+        reportMessage={reportMessage}
+        deleteMessage={deleteMessage}
+      />
     </Route>
   </Switch>
 );

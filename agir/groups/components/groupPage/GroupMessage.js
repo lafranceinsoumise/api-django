@@ -35,8 +35,8 @@ const GroupMessages = (props) => {
   } = props;
 
   const messageURL = useMemo(
-    () => getMessageURL && message.id && getMessageURL(message.id),
-    [getMessageURL, message.id]
+    () => getMessageURL && message && message.id && getMessageURL(message.id),
+    [getMessageURL, message]
   );
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -55,7 +55,7 @@ const GroupMessages = (props) => {
 
   return (
     <StyledWrapper>
-      {updateMessage ? (
+      {message && updateMessage ? (
         <MessageModal
           shouldShow={isModalOpen}
           onClose={handleModalClose}
@@ -68,7 +68,7 @@ const GroupMessages = (props) => {
         />
       ) : null}
       <StyledMessages
-        ready={!!message}
+        ready={message !== undefined}
         wait={<Skeleton style={{ margin: "1rem 0" }} />}
       >
         {message && (

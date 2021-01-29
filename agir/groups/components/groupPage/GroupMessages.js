@@ -121,26 +121,27 @@ const GroupMessages = (props) => {
         ready={Array.isArray(messages)}
         wait={<Skeleton style={{ margin: "1rem 0" }} />}
       >
-        {Array.isArray(messages) && messages.length > 0 ? (
-          messages.map((message) => (
-            <MessageCard
-              key={message.id}
-              message={message}
-              user={user}
-              comments={message.comments}
-              onClick={onClick}
-              onEdit={updateMessage ? editMessage : undefined}
-              onComment={createComment}
-              onReport={reportMessage}
-              onDelete={deleteMessage}
-              messageURL={getMessageURL && getMessageURL(message.id)}
-            />
-          ))
-        ) : (
+        {Array.isArray(messages) && messages.length > 0
+          ? messages.map((message) => (
+              <MessageCard
+                key={message.id}
+                message={message}
+                user={user}
+                comments={message.comments}
+                onClick={onClick}
+                onEdit={updateMessage ? editMessage : undefined}
+                onComment={createComment}
+                onReport={reportMessage}
+                onDelete={deleteMessage}
+                messageURL={getMessageURL && getMessageURL(message.id)}
+              />
+            ))
+          : null}
+        {Array.isArray(messages) && messages.length === 0 ? (
           <EmptyMessages
             onClickSendMessage={createMessage ? handleModalOpen : undefined}
           />
-        )}
+        ) : null}
         {typeof loadMoreMessages === "function" ? (
           <StyledButton>
             <Button
