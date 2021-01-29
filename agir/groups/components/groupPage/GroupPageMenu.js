@@ -8,7 +8,7 @@ import style from "@agir/front/genericComponents/_variables.scss";
 
 const StyledMenu = styled.nav`
   position: sticky;
-  z-index: 1;
+  z-index: 2;
   top: ${({ $stickyOffset }) => ($stickyOffset || 0) - 1}px;
   left: 0;
   right: 0;
@@ -50,6 +50,9 @@ const StyledMenu = styled.nav`
     @media (max-width: ${style.collapse}px) {
       height: 2.875rem;
       min-width: max-content;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 0 0.75rem;
     }
 
     &.active,

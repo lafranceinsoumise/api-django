@@ -11,30 +11,32 @@ import TextField from "@agir/front/formComponents/TextField";
 import EmojiPicker from "@agir/front/formComponents/EmojiPicker";
 
 const StyledCommentButton = styled.button`
-  display: flex;
-  width: 100%;
-  margin: 0;
-  border-radius: 8px;
-  border: 1px solid ${style.black100};
-  padding: 0.5rem 0.75rem;
-  text-decoration: none;
-  background-color: ${({ $disabled }) =>
-    $disabled ? style.black50 : style.white};
-  font-size: 0.875rem;
-  line-height: 1.65;
-  color: ${style.black500};
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  cursor: pointer;
-  -webkit-appearance: none;
-  -moz-appearance: none;
+  @media (max-width: ${style.collapse}px) {
+    display: flex;
+    width: 100%;
+    margin: 0;
+    border-radius: 8px;
+    border: 1px solid ${style.black100};
+    padding: 0.5rem 0.75rem;
+    text-decoration: none;
+    background-color: ${({ $disabled }) =>
+      $disabled ? style.black50 : style.white};
+    font-size: 0.875rem;
+    line-height: 1.65;
+    color: ${style.black500};
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 
-  &:hover,
-  &:focus {
-    outline: none;
-    background-color: ${style.black50};
-    transition: background-color 250ms ease-in-out;
+    &:hover,
+    &:focus {
+      outline: none;
+      background-color: ${style.black50};
+      transition: background-color 250ms ease-in-out;
+    }
   }
 `;
 const StyledField = styled.div``;
@@ -96,7 +98,7 @@ const StyledWrapper = styled.form`
       $disabled || $isExpanded ? "default" : "pointer"};
     font-size: 0.875rem;
 
-    p {
+    ${StyledCommentButton} {
       flex: 1 1 auto;
       margin: 0;
       padding: 0;
@@ -106,6 +108,10 @@ const StyledWrapper = styled.form`
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
+      border: none;
+      text-align: left;
+      background-color: transparent;
+      cursor: pointer;
     }
 
     label {
@@ -201,22 +207,34 @@ const CommentField = (props) => {
     setIsFocused(true);
   }, []);
 
-  const handleBlur = useCallback((event) => {
+  const blurOnClickOutside = useCallback((event) => {
     fieldWrapperRef.current &&
       !fieldWrapperRef.current.contains(event.target) &&
       setIsFocused(false);
   }, []);
 
-  useEffect(() => {
-    typeof window !== "undefined" &&
-      isFocused &&
-      !value &&
-      document.addEventListener("click", handleBlur);
+  const blurOnFocusOutside = useCallback(() => {
+    fieldWrapperRef.current &&
+      document.activeElement &&
+      !fieldWrapperRef.current.contains(document.activeElement) &&
+      setIsFocused(false);
+  }, []);
 
-    return () => {
-      document.removeEventListener("click", handleBlur);
-    };
-  }, [isFocused, value, handleBlur]);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      isFocused &&
+        !value &&
+        document.addEventListener("click", blurOnClickOutside);
+      isFocused &&
+        !value &&
+        document.addEventListener("keyup", blurOnFocusOutside);
+
+      return () => {
+        document.removeEventListener("click", blurOnClickOutside);
+        document.removeEventListener("keyup", blurOnFocusOutside);
+      };
+    }
+  }, [isFocused, value, blurOnClickOutside, blurOnFocusOutside]);
 
   const handleInputChange = useCallback((e) => {
     setValue(e.target.value);
@@ -260,6 +278,15 @@ const CommentField = (props) => {
     [onSend, value]
   );
 
+  const handleInputKeyDown = useCallback(
+    (e) => {
+      if (value && e.ctrlKey && e.keyCode === 13) {
+        onSend(value);
+      }
+    },
+    [value, onSend]
+  );
+
   return (
     <StyledWrapper
       $isExpanded={isExpanded}
@@ -281,6 +308,7 @@ const CommentField = (props) => {
                 value={value}
                 onChange={handleInputChange}
                 onFocus={handleFocus}
+                onKeyDown={handleInputKeyDown}
                 autoFocus={isFocused}
                 label={user.fullName}
                 disabled={disabled || isLoading}
@@ -294,7 +322,9 @@ const CommentField = (props) => {
             </>
           ) : (
             <>
-              <p>Écrire un commentaire</p>
+              <StyledCommentButton onFocus={handleFocus}>
+                Écrire un commentaire
+              </StyledCommentButton>
               <RawFeatherIcon name="send" color={style.primary500} small />
             </>
           )}

@@ -42,6 +42,17 @@ const StyledModalHeader = styled.header`
   padding: 0 1.5rem;
   height: 54px;
 
+  @media (max-width: ${style.collapse}px) {
+    display: ${({ $mobile }) => ($mobile ? "flex" : "none")};
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 1rem;
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 1;
+  }
+
   h4 {
     grid-column: 1/3;
     grid-row: 1/2;
@@ -53,11 +64,6 @@ const StyledModalHeader = styled.header`
   ${StyledIconButton} {
     grid-column: 2/3;
     grid-row: 1/2;
-  }
-
-  @media (max-width: ${style.collapse}px) {
-    display: ${({ $mobile }) => ($mobile ? "flex" : "none")};
-    justify-content: space-between;
   }
 `;
 const StyledModalBody = styled.div`
@@ -85,7 +91,8 @@ const StyledModalContent = styled.div`
   @media (max-width: ${style.collapse}px) {
     border-radius: 0;
     max-width: 100%;
-    height: 100vh;
+    min-height: 100vh;
+    padding-bottom: 1.5rem;
     margin: 0;
     display: flex;
     flex-flow: column nowrap;
@@ -123,9 +130,13 @@ const Modal = (props) => {
   } = props;
 
   const [content, setContent] = useState((message && message.content) || "");
+  const [hasBackButton, setHasBackButton] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(
     (message && message.linkedEvent) || null
   );
+
+  const maySend =
+    !isLoading && selectedEvent && content && content.trim().length <= 2000;
 
   const handleChangeContent = useCallback((content) => {
     setContent(content);
@@ -133,26 +144,39 @@ const Modal = (props) => {
 
   const handleSelectEvent = useCallback((event) => {
     setSelectedEvent(event);
+    setHasBackButton(true);
   }, []);
 
   const handleClearEvent = useCallback(() => {
     setSelectedEvent(null);
+    setHasBackButton(false);
   }, []);
 
   const handleSend = useCallback(() => {
-    onSend({
-      ...(message || {}),
-      content: content.trim(),
-      linkedEvent: selectedEvent,
-    });
-  }, [onSend, message, content, selectedEvent]);
+    maySend &&
+      onSend({
+        ...(message || {}),
+        content: content.trim(),
+        linkedEvent: selectedEvent,
+      });
+  }, [maySend, onSend, message, content, selectedEvent]);
 
   useEffect(() => {
     if (shouldShow) {
       setContent((message && message.content) || "");
       setSelectedEvent((message && message.linkedEvent) || null);
+      setHasBackButton(false);
     }
   }, [shouldShow, message]);
+
+  const handleSendOnCtrlEnter = useCallback(
+    (e) => {
+      if (maySend && e.ctrlKey && e.keyCode === 13) {
+        handleSend();
+      }
+    },
+    [maySend, handleSend]
+  );
 
   return (
     <ModalWrapper
@@ -168,23 +192,24 @@ const Modal = (props) => {
           </StyledIconButton>
         </StyledModalHeader>
         <StyledModalHeader $mobile>
-          <StyledIconButton onClick={onClose} disabled={isLoading}>
-            <RawFeatherIcon name="arrow-left" />
+          <StyledIconButton
+            onClick={hasBackButton ? handleClearEvent : onClose}
+            disabled={isLoading}
+          >
+            <RawFeatherIcon name={hasBackButton ? "arrow-left" : "x"} />
           </StyledIconButton>
           {selectedEvent ? (
             <Button
               color="secondary"
               small
-              disabled={
-                !selectedEvent || !content || content.trim() > 2000 || isLoading
-              }
+              disabled={!maySend}
               onClick={handleSend}
             >
               Publier
             </Button>
           ) : null}
         </StyledModalHeader>
-        <StyledModalBody>
+        <StyledModalBody onKeyDown={handleSendOnCtrlEnter}>
           {selectedEvent ? (
             <MessageStep
               content={content}
@@ -205,13 +230,7 @@ const Modal = (props) => {
         </StyledModalBody>
         {selectedEvent ? (
           <StyledModalFooter>
-            <Button
-              color="secondary"
-              disabled={
-                !selectedEvent || !content || content.trim() > 2000 || isLoading
-              }
-              onClick={handleSend}
-            >
+            <Button color="secondary" disabled={!maySend} onClick={handleSend}>
               Publier le message
             </Button>
           </StyledModalFooter>

@@ -37,8 +37,7 @@ const StyledOption = styled.button`
   color: ${({ $loadMore }) => ($loadMore ? style.primary500 : style.black1000)};
   font-size: ${({ $loadMore }) => ($loadMore ? "0.875rem" : "1rem")};
   line-height: 1.2;
-  margin-bottom: 0.5rem;
-  padding: 0.25rem 0;
+  padding: 0.5rem 0;
 
   &:last-child {
     margin-bottom: 0;

@@ -77,8 +77,10 @@ WithPastReports.args = {
 export const WithMessages = Template.bind({});
 WithMessages.args = {
   ...Default.args,
+  group: { ...group, isManager: true, isMember: true },
   pastEventReports: events,
   messages,
+  message: messages[0],
   activeTab: "comptes-rendus",
 };
 export const NonMemberView = Template.bind({});

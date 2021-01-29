@@ -102,6 +102,7 @@ const TextField = forwardRef((props, ref) => {
     helpText,
     maxLength,
     textArea,
+    hasCounter,
     ...rest
   } = props;
 
@@ -151,7 +152,7 @@ const TextField = forwardRef((props, ref) => {
         <FeatherIcon name="alert-circle" />
       </StyledIcon>
       <StyledError>{error}</StyledError>
-      {typeof maxLength === "number" ? (
+      {hasCounter && typeof maxLength === "number" ? (
         <StyledCounter $invalid={!!error || value.length > maxLength}>
           {value.length}/{maxLength}
         </StyledCounter>
@@ -170,11 +171,13 @@ TextField.propTypes = {
   error: PropTypes.string,
   maxLength: PropTypes.number,
   textArea: PropTypes.bool,
+  hasCounter: PropTypes.bool,
 };
 
 TextField.defaultProps = {
   type: "text",
   textArea: false,
+  hasCounter: true,
 };
 
 TextField.displayName = "TextField";

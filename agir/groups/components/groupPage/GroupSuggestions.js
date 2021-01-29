@@ -45,8 +45,10 @@ export const StyledWrapper = styled.div`
     flex-flow: row nowrap;
 
     & > * {
-      margin-right: 2rem;
       flex: 1 1 auto;
+      @media (min-width: ${style.collapse}px) {
+        margin-right: 2rem;
+      }
     }
   }
 `;

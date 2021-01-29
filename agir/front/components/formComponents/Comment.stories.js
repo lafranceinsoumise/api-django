@@ -53,7 +53,7 @@ export const Default = Template.bind({});
 Default.args = {
   message: {
     author,
-    content: "Bonjour !",
+    content: "Bonjour !\n\nBonjour !\nBonjour !",
     created: new Date().toUTCString(),
   },
   hasActions: false,

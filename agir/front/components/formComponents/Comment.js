@@ -93,6 +93,10 @@ const StyledWrapper = styled(animated.div)`
   display: flex;
   max-width: 100%;
 
+  & + & {
+    margin-top: 1rem;
+  }
+
   ${Avatar} {
     flex: 0 0 auto;
     width: 2rem;
@@ -106,7 +110,6 @@ const StyledWrapper = styled(animated.div)`
     flex: 1 1 auto;
     border-radius: 8px;
     background-color: ${style.black50};
-    border: 1px solid ${style.black100};
     flex-flow: row nowrap;
     padding: 0.75rem;
   }
@@ -130,6 +133,7 @@ const StyledWrapper = styled(animated.div)`
       font-size: 13px;
       color: ${style.black700};
       margin-left: 0.5rem;
+      font-style: normal;
 
       @media (max-width: ${style.collapse}px) {
         margin: 0.25rem 0;
@@ -153,7 +157,13 @@ const StyledWrapper = styled(animated.div)`
       font-size: inherit;
       font-family: inherit;
       line-height: 1.65;
-      min-height: 0.5rem;
+
+      span {
+        display: block;
+        min-height: 1em;
+        font-size: inherit;
+        line-height: inherit;
+      }
     }
   }
 
@@ -201,7 +211,7 @@ const CommentField = (props) => {
           </StyledMessageHeader>
           <article>
             {content.split("\n").map((paragraph, i) => (
-              <p key={i + "__" + paragraph}>{paragraph}</p>
+              <span key={i + "__" + paragraph}>{paragraph}</span>
             ))}
           </article>
         </StyledMessageContent>

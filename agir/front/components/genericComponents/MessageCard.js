@@ -112,19 +112,20 @@ const StyledAction = styled.div`
   }
 `;
 const StyledContent = styled.div`
-  margin: 0 0 1rem;
   padding: 0;
   font-size: inherit;
   line-height: 1.65;
 
   @media (max-width: ${style.collapse}px) {
-    margin: 1rem 0;
     font-size: 0.875rem;
     line-height: 1.6;
   }
 
-  p {
-    min-height: 0.5rem;
+  span {
+    display: block;
+    min-height: 1em;
+    font-size: inherit;
+    line-height: inherit;
   }
 `;
 const StyledHeader = styled.div`
@@ -132,7 +133,7 @@ const StyledHeader = styled.div`
   flex-flow: row nowrap;
   align-items: flex-start;
   font-size: 1rem;
-  margin: 0;
+  margin-bottom: 0.5rem;
   padding: 0;
   line-height: 1.4;
 
@@ -202,7 +203,6 @@ const StyledCommentCount = styled.p`
   color: ${style.primary500};
   font-size: 0.875rem;
   font-weight: 500;
-  margin: 1rem 0;
 
   ${RawFeatherIcon} {
     width: 1rem;
@@ -212,6 +212,10 @@ const StyledCommentCount = styled.p`
 const StyledComments = styled.div`
   && > * {
     margin-top: 1rem;
+
+    &:first-child {
+      margin-top: 0;
+    }
   }
 `;
 const StyledMessage = styled.div``;
@@ -229,7 +233,6 @@ const StyledWrapper = styled.div`
     scroll-margin-top: 120px;
     padding: 1.5rem 1rem;
     box-shadow: ${style.elaborateShadow};
-    min-height: 100vh;
   }
 
   & + & {
@@ -255,7 +258,16 @@ const StyledWrapper = styled.div`
 
   ${StyledMessage} {
     flex: 1 1 auto;
-    margin-bottom: 0.5rem;
+
+    & > * {
+      margin-top: 1rem;
+      margin-bottom: 0;
+
+      &:first-child,
+      &:empty {
+        margin-top: 0;
+      }
+    }
 
     ${Card} {
       @media (max-width: ${style.collapse}px) {
@@ -272,7 +284,6 @@ const MessageCard = (props) => {
     message,
     messageURL,
     comments,
-    commentCount,
     isLoading,
     onClick,
     onComment,
@@ -283,7 +294,7 @@ const MessageCard = (props) => {
     scrollIn,
   } = props;
 
-  const { author, content, created, linkedEvent } = message;
+  const { author, content, created, linkedEvent, commentCount } = message;
 
   const messageCardRef = useRef();
 
@@ -426,18 +437,21 @@ const MessageCard = (props) => {
         </StyledHeader>
         <StyledContent>
           {content.split("\n").map((paragraph, i) => (
-            <p key={i + "__" + paragraph}>{paragraph}</p>
+            <span key={i + "__" + paragraph}>{paragraph}</span>
           ))}
         </StyledContent>
         {event ? <EventCard {...event} /> : null}
         {typeof commentCount === "number" && commentCount > 1 ? (
-          <StyledCommentCount onClick={handleClick}>
+          <StyledCommentCount
+            onClick={handleClick}
+            style={{ cursor: "pointer" }}
+          >
             <RawFeatherIcon name="message-circle" color={style.primary500} />
             &ensp;{commentCount} commentaires
           </StyledCommentCount>
         ) : null}
-        <PageFadeIn ready={!!comments}>
-          <StyledComments>
+        <StyledComments>
+          <PageFadeIn ready={Array.isArray(comments) && comments.length > 0}>
             {Array.isArray(comments) && comments.length > 0
               ? comments.map((comment) => (
                   <Comment
@@ -449,28 +463,28 @@ const MessageCard = (props) => {
                   />
                 ))
               : null}
-            {onComment ? (
-              withMobileCommentField ? (
-                <CommentField
-                  key={comments.length}
-                  isLoading={isLoading}
-                  user={user}
-                  onSend={handleComment}
-                />
-              ) : (
-                <ResponsiveLayout
-                  MobileLayout={CommentButton}
-                  DesktopLayout={CommentField}
-                  key={comments.length}
-                  isLoading={isLoading}
-                  user={user}
-                  onSend={handleComment}
-                  onClick={onClick && handleClick}
-                />
-              )
-            ) : null}
-          </StyledComments>
-        </PageFadeIn>
+          </PageFadeIn>
+          {onComment ? (
+            withMobileCommentField ? (
+              <CommentField
+                key={comments.length}
+                isLoading={isLoading}
+                user={user}
+                onSend={handleComment}
+              />
+            ) : (
+              <ResponsiveLayout
+                MobileLayout={CommentButton}
+                DesktopLayout={CommentField}
+                key={comments.length}
+                isLoading={isLoading}
+                user={user}
+                onSend={handleComment}
+                onClick={onClick && handleClick}
+              />
+            )
+          ) : null}
+        </StyledComments>
       </StyledMessage>
     </StyledWrapper>
   );
@@ -490,10 +504,10 @@ MessageCard.propTypes = {
     created: PropTypes.string.isRequired,
     content: PropTypes.string.isRequired,
     linkedEvent: PropTypes.object,
+    commentCount: PropTypes.number,
   }).isRequired,
   messageURL: PropTypes.string,
   comments: PropTypes.arrayOf(PropTypes.object),
-  commentCount: PropTypes.number,
   onClick: PropTypes.func,
   onComment: PropTypes.func,
   onDelete: PropTypes.func,
@@ -501,5 +515,6 @@ MessageCard.propTypes = {
   onReport: PropTypes.func,
   isLoading: PropTypes.bool,
   withMobileCommentField: PropTypes.bool,
+  scrollIn: PropTypes.bool,
 };
 export default MessageCard;

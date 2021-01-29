@@ -10,8 +10,12 @@ import Skeleton from "@agir/front/genericComponents/Skeleton";
 
 import MessageModal from "@agir/front/formComponents/MessageModal/Modal";
 
-const StyledMessages = styled(PageFadeIn)`
+const StyledMessage = styled.div`
   margin-top: 1rem;
+
+  @media (max-width: ${style.collapse}px) {
+    min-height: 100vh;
+  }
 `;
 const StyledWrapper = styled.div`
   @media (max-width: ${style.collapse}px) {
@@ -67,27 +71,29 @@ const GroupMessages = (props) => {
           onSend={updateMessage}
         />
       ) : null}
-      <StyledMessages
+      <PageFadeIn
         ready={message !== undefined}
         wait={<Skeleton style={{ margin: "1rem 0" }} />}
       >
-        {message && (
-          <MessageCard
-            key={message.id}
-            message={message}
-            user={user}
-            comments={message.comments}
-            onClick={onClick}
-            onEdit={updateMessage ? editMessage : undefined}
-            onComment={createComment}
-            onReport={reportMessage}
-            onDelete={deleteMessage}
-            messageURL={messageURL}
-            withMobileCommentField
-            scrollIn
-          />
-        )}
-      </StyledMessages>
+        <StyledMessage>
+          {message && (
+            <MessageCard
+              key={message.id}
+              message={message}
+              user={user}
+              comments={message.comments}
+              onClick={onClick}
+              onEdit={updateMessage ? editMessage : undefined}
+              onComment={createComment}
+              onReport={reportMessage}
+              onDelete={deleteMessage}
+              messageURL={messageURL}
+              withMobileCommentField
+              scrollIn
+            />
+          )}
+        </StyledMessage>
+      </PageFadeIn>
     </StyledWrapper>
   );
 };

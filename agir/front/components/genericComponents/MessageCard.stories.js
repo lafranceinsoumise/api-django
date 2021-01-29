@@ -124,3 +124,19 @@ Default.args = {
     },
   ],
 };
+
+export const NoComments = Template.bind({});
+NoComments.args = {
+  ...Default.args,
+  comments: [],
+  commentCount: 0,
+};
+
+export const NoEvent = Template.bind({});
+NoEvent.args = {
+  ...NoComments.args,
+  message: {
+    ...NoComments.args.message,
+    linkedEvent: null,
+  },
+};

@@ -11,6 +11,7 @@ import EmojiPicker from "@agir/front/formComponents/EmojiPicker";
 
 const StyledLabel = styled.div``;
 const StyledMessage = styled.div``;
+const StyledCounter = styled.span``;
 const StyledWrapper = styled.div`
   padding: 1.5rem;
 
@@ -101,9 +102,28 @@ const StyledWrapper = styled.div`
       }
     }
 
-    & > :last-child {
-      @media (max-width: ${style.collapse}px) {
-        display: none;
+    footer {
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: flex-start;
+      align-items: center;
+
+      & > * {
+        @media (max-width: ${style.collapse}px) {
+          display: none;
+        }
+      }
+
+      ${StyledCounter} {
+        font-size: 0.813rem;
+        font-weight: 400;
+        line-height: 1;
+        color: ${({ $invalid }) => ($invalid ? style.redNSP : "inherit")};
+        margin-left: auto;
+
+        @media (max-width: ${style.collapse}px) {
+          display: inline;
+        }
       }
     }
   }
@@ -192,8 +212,16 @@ const MessageStep = (props) => {
           disabled={disabled}
           placeholder="Quoi de neuf dans votre groupe ?"
           maxLength={maxLength}
+          hasCounter={false}
         />
-        <EmojiPicker onOpen={handleEmojiOpen} onSelect={handleEmojiSelect} />
+        <footer>
+          <EmojiPicker onOpen={handleEmojiOpen} onSelect={handleEmojiSelect} />
+          {typeof maxLength === "number" && content.length >= maxLength / 2 ? (
+            <StyledCounter $invalid={content.length > maxLength}>
+              {content.length}/{maxLength}
+            </StyledCounter>
+          ) : null}
+        </footer>
       </StyledMessage>
     </StyledWrapper>
   );
