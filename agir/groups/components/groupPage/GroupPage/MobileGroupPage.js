@@ -45,22 +45,13 @@ const StyledTab = styled(animated.div)`
   }
 `;
 
-const Tab = (props) => {
+// TODO: fix swiping behavior
+const SwipeableTab = (props) => {
   const { onNextTab, onPrevTab, children } = props;
   const [{ xy }, set] = useSpring(() => ({ xy: [0, 0] }));
   const bind = useDrag(
     ({ args: [limit], down, movement: [x] }) => {
       if (down) {
-        if (!onPrevTab && !onNextTab) {
-          return;
-        }
-        console.log(x, onPrevTab, onNextTab);
-        if (x > 0 && !onPrevTab) {
-          return;
-        }
-        if (x <= 0 && !onNextTab) {
-          return;
-        }
         const newX =
           x > 0 ? Math.min(Math.abs(limit), x) : Math.max(-Math.abs(limit), x);
         set({ xy: [newX, 0] });
@@ -91,6 +82,21 @@ const Tab = (props) => {
       {children}
     </StyledTab>
   );
+};
+SwipeableTab.propTypes = {
+  onNextTab: PropTypes.func,
+  onPrevTab: PropTypes.func,
+  children: PropTypes.node,
+};
+
+const Tab = (props) => {
+  const { children } = props;
+  const tabRef = useRef();
+  useEffect(() => {
+    tabRef.current & tabRef.current.scrollIntoView();
+  }, []);
+
+  return <StyledTab ref={tabRef}>{children}</StyledTab>;
 };
 Tab.propTypes = {
   onNextTab: PropTypes.func,
