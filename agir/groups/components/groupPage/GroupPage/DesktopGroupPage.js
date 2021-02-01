@@ -59,7 +59,7 @@ export const DesktopGroupPageSkeleton = () => (
   <Container
     style={{
       margin: "4rem auto",
-      padding: "0 4rem",
+      padding: "2rem 0 4rem",
       background: "white",
     }}
   >

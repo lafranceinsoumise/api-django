@@ -55,14 +55,16 @@ const GroupPage = (props) => {
   }, [is2022, dispatch]);
 
   useEffect(() => {
-    isManager &&
-      routes.settings &&
+    if (isManager && routes.settings) {
       dispatch(
         setTopBarRightLink({
           href: routes.settings,
           label: "Gestion du groupe",
         })
       );
+    } else {
+      dispatch(setTopBarRightLink(null));
+    }
   }, [isManager, routes, dispatch]);
 
   return (

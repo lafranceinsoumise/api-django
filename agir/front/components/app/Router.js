@@ -13,6 +13,7 @@ import {
 } from "@agir/front/globalContext/actions";
 
 import Layout from "@agir/front/dashboardComponents/Layout";
+import FeedbackButton from "@agir/front/allPages/FeedbackButton";
 import ErrorBoundary from "./ErrorBoundary";
 
 import routes, { BASE_PATH } from "./routes.config";
@@ -43,6 +44,7 @@ const Page = (props) => {
             {...rest}
             data={[]}
           />
+          <FeedbackButton style={{ bottom: "1rem" }} />
         </Suspense>
       </ErrorBoundary>
     );
@@ -58,6 +60,7 @@ const Page = (props) => {
             {...rest}
             data={[]}
           />
+          <FeedbackButton />
         </Suspense>
       </ErrorBoundary>
     </Layout>

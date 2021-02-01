@@ -56,7 +56,7 @@ const InfoRoute = ({
     <ShareCard title="Partager le lien du groupe" />
 
     {Array.isArray(groupSuggestions) && groupSuggestions.length > 0 ? (
-      <div style={{ marginTop: 71, marginBottom: 71 }}>
+      <div style={{ paddingTop: "2rem" }}>
         <GroupSuggestions groups={groupSuggestions} />
       </div>
     ) : null}

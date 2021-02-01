@@ -162,6 +162,7 @@ const MobileGroupPage = (props) => {
       style={{
         margin: 0,
         padding: "0 0 3.5rem",
+        backgroundColor: style.black25,
       }}
     >
       <GroupBanner {...group} />

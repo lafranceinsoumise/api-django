@@ -17,6 +17,10 @@ const StyledPanel = styled.div`
   padding: 1.5rem;
   margin: 1rem 0;
 
+  @media (max-width: ${style.collapse}px) {
+    display: none;
+  }
+
   && ul {
     margin-bottom: 0;
 
@@ -25,7 +29,7 @@ const StyledPanel = styled.div`
       font-weight: 500;
 
       a {
-        margin-left: 1.25rem;
+        margin-left: 0.5rem;
       }
 
       ${RawFeatherIcon} {
@@ -56,10 +60,13 @@ const StyledContent = styled.div`
     margin: 0;
     width: 100%;
     justify-content: center;
+    margin-bottom: 1rem;
   }
 
   ${Button} + ${Button} {
-    margin-top: 1rem;
+    @media (max-width: ${style.collapse}px) {
+      display: none;
+    }
   }
 
   p {
@@ -67,7 +74,6 @@ const StyledContent = styled.div`
     font-size: 0.813rem;
     line-height: 1.5;
     color: ${style.black500};
-    margin-top: 1em;
 
     @media (max-width: ${style.collapse}px) {
       font-size: 0.688rem;

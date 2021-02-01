@@ -42,8 +42,12 @@ const StyledButton = styled.div`
     }
   }
 `;
-const StyledMessages = styled(PageFadeIn)`
+const StyledMessages = styled.div`
   margin-top: 1rem;
+
+  @media (max-width: ${style.collapse}px) {
+    background-color: ${style.black50};
+  }
 `;
 const StyledWrapper = styled.div`
   @media (max-width: ${style.collapse}px) {
@@ -117,44 +121,50 @@ const GroupMessages = (props) => {
           onSend={saveMessage}
         />
       ) : null}
-      <StyledMessages
+      <PageFadeIn
         ready={Array.isArray(messages)}
         wait={<Skeleton style={{ margin: "1rem 0" }} />}
       >
-        {Array.isArray(messages) && messages.length > 0
-          ? messages.map((message) => (
-              <MessageCard
-                key={message.id}
-                message={message}
-                user={user}
-                comments={message.comments}
-                onClick={onClick}
-                onEdit={updateMessage ? editMessage : undefined}
-                onComment={createComment}
-                onReport={reportMessage}
-                onDelete={deleteMessage}
-                messageURL={getMessageURL && getMessageURL(message.id)}
-              />
-            ))
-          : null}
-        {Array.isArray(messages) && messages.length === 0 ? (
-          <EmptyMessages
-            onClickSendMessage={createMessage ? handleModalOpen : undefined}
-          />
-        ) : null}
-        {typeof loadMoreMessages === "function" ? (
-          <StyledButton>
-            <Button
-              color="white"
-              onClick={loadMoreMessages}
-              disabled={isLoading}
-            >
-              Charger plus d'actualités&ensp;
-              <RawFeatherIcon name="chevron-down" width="1em" strokeWidth={3} />
-            </Button>
-          </StyledButton>
-        ) : null}
-      </StyledMessages>
+        <StyledMessages>
+          {Array.isArray(messages) && messages.length > 0
+            ? messages.map((message) => (
+                <MessageCard
+                  key={message.id}
+                  message={message}
+                  user={user}
+                  comments={message.comments}
+                  onClick={onClick}
+                  onEdit={updateMessage ? editMessage : undefined}
+                  onComment={createComment}
+                  onReport={reportMessage}
+                  onDelete={deleteMessage}
+                  messageURL={getMessageURL && getMessageURL(message.id)}
+                />
+              ))
+            : null}
+          {Array.isArray(messages) && messages.length === 0 ? (
+            <EmptyMessages
+              onClickSendMessage={createMessage ? handleModalOpen : undefined}
+            />
+          ) : null}
+          {typeof loadMoreMessages === "function" ? (
+            <StyledButton>
+              <Button
+                color="white"
+                onClick={loadMoreMessages}
+                disabled={isLoading}
+              >
+                Charger plus d'actualités&ensp;
+                <RawFeatherIcon
+                  name="chevron-down"
+                  width="1em"
+                  strokeWidth={3}
+                />
+              </Button>
+            </StyledButton>
+          ) : null}
+        </StyledMessages>
+      </PageFadeIn>
     </StyledWrapper>
   );
 };

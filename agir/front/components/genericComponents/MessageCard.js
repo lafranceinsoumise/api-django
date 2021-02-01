@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import styled from "styled-components";
 
-import { FaWhatsapp, FaTelegram, FaFacebook, FaTwitter } from "react-icons/fa";
+import { FaWhatsapp, FaTelegram } from "react-icons/fa";
 
 import style from "@agir/front/genericComponents/_variables.scss";
 import { timeAgo } from "@agir/lib/utils/time";
@@ -34,6 +34,18 @@ const StyledInlineMenuItems = styled.div`
   @media (max-width: ${style.collapse}px) {
     margin: 0;
     padding: 1.5rem;
+  }
+
+  & > span {
+    font-size: 0.875rem;
+    line-height: 20px;
+    font-weight: 400;
+    color: ${style.black1000};
+    margin-bottom: 0.5rem;
+
+    @media (max-width: ${style.collapse}px) {
+      margin-bottom: 1.5rem;
+    }
   }
 
   a,
@@ -133,7 +145,7 @@ const StyledHeader = styled.div`
   flex-flow: row nowrap;
   align-items: flex-start;
   font-size: 1rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   padding: 0;
   line-height: 1.4;
 
@@ -375,21 +387,10 @@ const MessageCard = (props) => {
             {encodedMessageURL ? (
               <InlineMenu triggerIconName="share-2" triggerSize="1rem">
                 <StyledInlineMenuItems>
+                  <span>Partager avec d’autres membres du groupe&nbsp;:</span>
                   <a href={`https://t.me/share/url?url=${encodedMessageURL}`}>
                     <FaTelegram color={style.primary500} />
                     Telegram
-                  </a>
-                  <a
-                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodedMessageURL}`}
-                  >
-                    <FaFacebook color={style.primary500} />
-                    Facebook
-                  </a>
-                  <a
-                    href={`https://twitter.com/intent/tweet?text=${encodedMessageURL}`}
-                  >
-                    <FaTwitter color={style.primary500} />
-                    Twitter
                   </a>
                   <a href={`https://wa.me/?text=${encodedMessageURL}`}>
                     <FaWhatsapp color={style.primary500} />

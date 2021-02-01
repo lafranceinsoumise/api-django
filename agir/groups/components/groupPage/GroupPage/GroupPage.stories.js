@@ -53,8 +53,8 @@ Default.args = {
     { ...group, id: "b" },
     { ...group, id: "c" },
   ],
-  upcomingEvents: events,
-  pastEvents: events,
+  upcomingEvents: events.slice(0, 1),
+  // pastEvents: events,
   activeTab: GROUP_PAGE_ROUTES[0].pathname,
 };
 export const Loading = Template.bind({});
