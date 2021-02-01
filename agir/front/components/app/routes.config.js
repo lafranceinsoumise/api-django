@@ -9,6 +9,9 @@ const EventPage = lazy(() => import("@agir/events/eventPage/EventPage"));
 
 const GroupsPage = lazy(() => import("@agir/groups/groupsPage/GroupsPage"));
 const GroupPage = lazy(() => import("@agir/groups/groupPage/GroupPage"));
+const UnavailableGroupMessagePage = lazy(() =>
+  import("@agir/groups/groupPage/UnavailableMessagePage")
+);
 const GroupMap = lazy(() => import("@agir/carte/page__groupMap/GroupMap"));
 
 const ActivityPage = lazy(() =>
@@ -106,6 +109,18 @@ export const routeConfig = {
     hasLayout: true,
     layoutProps: {
       smallBackgroundColor: style.black25,
+    },
+  }),
+  unavailableGroupMessage: new RouteConfig({
+    id: "unavailableGroupMessage",
+    pathname: "/groupes/:groupPk/discussion/indisponible/",
+    exact: true,
+    label: "Discussion indisponible",
+    Component: UnavailableGroupMessagePage,
+    backLink: {
+      route: "groups",
+      label: "Retour à l'accueil",
+      isProtected: true,
     },
   }),
   groupDetails: new RouteConfig({

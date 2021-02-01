@@ -239,21 +239,29 @@ export const useTabs = (props, isMobile = true) => {
     [group, isMobile]
   );
 
-  const { activeTab, activeTabIndex, shouldRedirect } = useMemo(() => {
+  const tabs = useMemo(() => routes.filter((route) => route.hasTab), [routes]);
+
+  const { activeRoute, shouldRedirect } = useMemo(() => {
     const result = {
-      activeTab: routes[0],
-      activeTabIndex: 0,
+      activeRoute: tabs[0],
       shouldRedirect: true,
     };
-    routes.forEach((route, i) => {
+    routes.forEach((route) => {
       if (route.match(location.pathname)) {
-        result.activeTab = route;
-        result.activeTabIndex = i;
+        result.activeRoute = route;
         result.shouldRedirect = false;
       }
     });
     return result;
-  }, [routes, location.pathname]);
+  }, [tabs, routes, location.pathname]);
+
+  const activeTabIndex = useMemo(() => {
+    for (let i = 0; tabs[i]; i++) {
+      if (activeRoute === tabs[i]) {
+        return i;
+      }
+    }
+  }, [tabs, activeRoute]);
 
   const handleTabChange = useCallback(
     (route, params) => {
@@ -263,18 +271,18 @@ export const useTabs = (props, isMobile = true) => {
   );
 
   const handleNextTab = useCallback(() => {
-    const nextIndex = Math.min(activeTabIndex + 1, routes.length - 1);
-    handleTabChange(routes[nextIndex]);
-  }, [handleTabChange, activeTabIndex, routes]);
+    const nextIndex = Math.min(activeTabIndex + 1, tabs.length - 1);
+    handleTabChange(tabs[nextIndex]);
+  }, [handleTabChange, activeTabIndex, tabs]);
 
   const handlePrevTab = useCallback(() => {
     const prevIndex = Math.max(0, activeTabIndex - 1);
-    handleTabChange(routes[prevIndex]);
-  }, [handleTabChange, activeTabIndex, routes]);
+    handleTabChange(tabs[prevIndex]);
+  }, [handleTabChange, activeTabIndex, tabs]);
 
   useEffect(() => {
-    shouldRedirect && handleTabChange(activeTab);
-  }, [shouldRedirect, handleTabChange, activeTab]);
+    shouldRedirect && handleTabChange(activeRoute);
+  }, [shouldRedirect, handleTabChange, activeRoute]);
 
   useMemo(() => {
     window.scrollTo(0, 0);
@@ -284,7 +292,7 @@ export const useTabs = (props, isMobile = true) => {
   return {
     tabs: routes,
     activeTabIndex,
-    hasTabs: routes.length > 1,
+    hasTabs: tabs.length > 1,
     onTabChange: handleTabChange,
     onNextTab: handleNextTab,
     onPrevTab: handlePrevTab,

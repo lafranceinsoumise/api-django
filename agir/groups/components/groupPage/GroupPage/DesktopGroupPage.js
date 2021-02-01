@@ -11,10 +11,8 @@ import Link from "@agir/front/app/Link";
 import { Column, Container, Row } from "@agir/front/genericComponents/grid";
 
 import Skeleton from "@agir/front/genericComponents/Skeleton";
-import ShareCard from "@agir/front/genericComponents/ShareCard";
 
 import GroupBanner from "../GroupBanner";
-import GroupLocation from "../GroupLocation";
 import GroupUserActions from "../GroupUserActions";
 import GroupContactCard from "../GroupContactCard";
 import GroupDescription from "../GroupDescription";
@@ -22,15 +20,12 @@ import GroupLinks from "../GroupLinks";
 import GroupFacts from "../GroupFacts";
 import GroupDonation from "../GroupDonation";
 import GroupSuggestions from "../GroupSuggestions";
-import GroupEventList from "../GroupEventList";
-import GroupMessages from "../GroupMessages";
-import GroupMessage from "../GroupMessage";
 import GroupPageMenu from "../GroupPageMenu";
-import {
-  MemberEmptyEvents,
-  ManagerEmptyEvents,
-  EmptyReports,
-} from "../EmptyContent";
+
+import AgendaRoute from "./Routes/AgendaRoute";
+import ReportsRoute from "./Routes/ReportsRoute";
+import MessagesRoute from "./Routes/MessagesRoute";
+import MessageRoute from "./Routes/MessageRoute";
 
 const IndexLinkAnchor = styled(Link)`
   font-weight: 600;
@@ -89,130 +84,9 @@ export const DesktopGroupPageSkeleton = () => (
   </Container>
 );
 
-const MessagesRoute = ({
-  user,
-  allEvents,
-  message,
-  messages,
-  getMessageURL,
-  isLoadingMessages,
-  loadMoreMessages,
-  loadMorePastEvents,
-  createMessage,
-  updateMessage,
-  createComment,
-  reportMessage,
-  deleteMessage,
-  onClickMessage,
-  basePath,
-}) => (
-  <Switch>
-    <Route path={basePath} exact>
-      <GroupMessages
-        user={user}
-        events={allEvents}
-        messages={messages}
-        getMessageURL={getMessageURL}
-        isLoading={isLoadingMessages}
-        onClick={onClickMessage}
-        loadMoreMessages={loadMoreMessages}
-        loadMoreEvents={loadMorePastEvents}
-        createMessage={createMessage}
-        updateMessage={updateMessage}
-        createComment={createComment}
-        reportMessage={reportMessage}
-        deleteMessage={deleteMessage}
-      />
-    </Route>
-    <Route path={basePath + ":messagePk"} exact>
-      <GroupMessage
-        user={user}
-        events={allEvents}
-        message={message}
-        getMessageURL={getMessageURL}
-        isLoading={isLoadingMessages}
-        loadMoreEvents={loadMorePastEvents}
-        updateMessage={updateMessage}
-        createComment={createComment}
-        reportMessage={reportMessage}
-        deleteMessage={deleteMessage}
-      />
-    </Route>
-  </Switch>
-);
-MessagesRoute.propTypes = {
-  allEvents: PropTypes.arrayOf(PropTypes.object),
-  loadMorePastEvents: PropTypes.func,
-  message: PropTypes.object,
-  messages: PropTypes.arrayOf(PropTypes.object),
-  isLoadingMessages: PropTypes.bool,
-  loadMoreMessages: PropTypes.func,
-  createMessage: PropTypes.func,
-  updateMessage: PropTypes.func,
-  createComment: PropTypes.func,
-  reportMessage: PropTypes.func,
-  deleteMessage: PropTypes.func,
-  onClickMessage: PropTypes.func,
-  user: PropTypes.object,
-  getMessageURL: PropTypes.func,
-  basePath: PropTypes.string,
-};
-
-const AgendaRoute = ({
-  group,
-  allEvents,
-  upcomingEvents,
-  pastEvents,
-  loadMorePastEvents,
-  isLoadingPastEvents,
-  hasTabs,
-}) =>
-  Array.isArray(upcomingEvents) &&
-  Array.isArray(pastEvents) &&
-  allEvents.length === 0 ? (
-    <>
-      {hasTabs && group.isManager ? <ManagerEmptyEvents /> : null}
-      {hasTabs && !group.isManager && group.isMember ? (
-        <MemberEmptyEvents />
-      ) : null}
-      <GroupDescription {...group} maxHeight="auto" />
-      <ShareCard title="Inviter vos ami·es à rejoindre le groupe" />
-      <GroupLocation {...group} />
-    </>
-  ) : (
-    <>
-      <GroupEventList title="Événements à venir" events={upcomingEvents} />
-      <GroupEventList
-        title="Événements passés"
-        events={pastEvents}
-        loadMore={loadMorePastEvents}
-        isLoading={isLoadingPastEvents}
-      />
-      <GroupLocation {...group} />
-      <ShareCard title="Partager le lien du groupe" />
-    </>
-  );
-AgendaRoute.propTypes = {
-  group: PropTypes.object,
-  allEvents: PropTypes.arrayOf(PropTypes.object),
-  upcomingEvents: PropTypes.arrayOf(PropTypes.object),
-  pastEvents: PropTypes.arrayOf(PropTypes.object),
-  isLoadingPastEvents: PropTypes.bool,
-  loadMorePastEvents: PropTypes.func,
-  hasTabs: PropTypes.bool,
-};
-const ReportsRoute = ({ pastEventReports }) =>
-  Array.isArray(pastEventReports) && pastEventReports.length === 0 ? (
-    <EmptyReports />
-  ) : (
-    <GroupEventList title="Comptes-rendus" events={pastEventReports} />
-  );
-ReportsRoute.propTypes = {
-  pastEventReports: PropTypes.arrayOf(PropTypes.object),
-};
-
 const Routes = {
   messages: React.memo(MessagesRoute),
+  message: React.memo(MessageRoute),
   agenda: React.memo(AgendaRoute),
   reports: React.memo(ReportsRoute),
 };
@@ -235,10 +109,10 @@ const DesktopGroupPage = (props) => {
 
   const handleClickMessage = useCallback(
     (message) => {
-      const messagesTab = tabs.find((tab) => tab.id === "messages");
-      if (messagesTab) {
+      const messageTab = tabs.find((tab) => tab.id === "message");
+      if (messageTab) {
         return (
-          onTabChange && onTabChange(messagesTab, { messagePk: message.id })
+          onTabChange && onTabChange(messageTab, { messagePk: message.id })
         );
       }
     },
@@ -247,9 +121,9 @@ const DesktopGroupPage = (props) => {
 
   const getMessageURL = useCallback(
     (messagePk) => {
-      const messagesTab = tabs.find((tab) => tab.id === "messages");
-      if (messagesTab) {
-        return messagesTab.getLink({ messagePk });
+      const messageTab = tabs.find((tab) => tab.id === "message");
+      if (messageTab) {
+        return messageTab.getLink({ messagePk });
       }
     },
     [tabs]
@@ -300,7 +174,7 @@ const DesktopGroupPage = (props) => {
           {tabs.map((tab) => {
             const R = Routes[tab.id];
             return (
-              <Route key={tab.id} path={tab.pathname}>
+              <Route key={tab.id} path={tab.pathname} exact>
                 <Column grow>
                   <R
                     {...props}

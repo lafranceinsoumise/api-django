@@ -76,11 +76,14 @@ const GroupPageMenu = (props) => {
 
   return hasTabs ? (
     <StyledMenu $stickyOffset={stickyOffset}>
-      {tabs.map((tab) => (
-        <NavLink key={tab.id} to={tab.getLink()}>
-          {tab.label}
-        </NavLink>
-      ))}
+      {tabs.map(
+        (tab) =>
+          tab.hasTab && (
+            <NavLink key={tab.id} to={tab.getLink()}>
+              {tab.label}
+            </NavLink>
+          )
+      )}
     </StyledMenu>
   ) : null;
 };

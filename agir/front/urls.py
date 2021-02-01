@@ -51,6 +51,11 @@ urlpatterns = [
         name="view_group_messages",
     ),
     path(
+        "groupes/<uuid:pk>/discussion/indisponible/",
+        views.SupportGroupDetailView.as_view(),
+        name="unavailable_group_message",
+    ),
+    path(
         "groupes/<uuid:pk>/discussion/<uuid:message_pk>/",
         views.SupportGroupDetailView.as_view(),
         name="view_group_message",

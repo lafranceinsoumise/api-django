@@ -3,40 +3,42 @@ const routeConfig = {
     id: "info",
     pathname: "/groupes/:groupPk/presentation/",
     label: "Présentation",
+    hasTab: true,
     hasRoute: (_, isMobile) => !!isMobile,
   },
   messages: {
     id: "messages",
-    pathname: "/groupes/:groupPk/discussion/:messagePk?/",
+    pathname: "/groupes/:groupPk/discussion/",
     label: "Discussion",
-    hasRoute: (group) => {
-      if (group.isManager) {
-        return true;
-      }
-      return group.hasMessages && group.isMember;
-    },
+    hasTab: true,
+    hasRoute: (group) =>
+      group.isManager || (group.isMember && group.hasMessages),
+  },
+  message: {
+    id: "message",
+    pathname: "/groupes/:groupPk/discussion/:messagePk/",
+    label: "Message",
+    hasTab: false,
+    hasRoute: true,
   },
   agenda: {
     id: "agenda",
     pathname: "/groupes/:groupPk/agenda/",
     label: "Agenda",
-    hasRoute: (group, isMobile) => {
-      if (group.isMember || !isMobile) {
-        return true;
-      }
-      return group.hasUpcomingEvents || group.hasPastEvents;
-    },
+    hasTab: true,
+    hasRoute: (group, isMobile) =>
+      !isMobile ||
+      group.isMember ||
+      group.hasUpcomingEvents ||
+      group.hasPastEvents,
   },
   reports: {
     id: "reports",
     pathname: "/groupes/:groupPk/comptes-rendus/",
     label: "Comptes-rendus",
-    hasRoute: (group) => {
-      if (group.isManager) {
-        return true;
-      }
-      return group.isMember && group.hasPastEventReports;
-    },
+    hasTab: true,
+    hasRoute: (group) =>
+      group.isManager || (group.isMember && group.hasPastEventReports),
   },
 };
 
